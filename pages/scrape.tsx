@@ -2,6 +2,7 @@ import React from "react";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import puppeteer from "puppeteer";
 import TableData from "#/components/layouts/TableData";
+import fs from "fs/promises";
 
 const scrape = ({
   data,
@@ -65,6 +66,9 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
             rowData.push(td.innerText);
           }
         });
+
+        if (rowData.length == 0) return;
+
         tableDataArr.push(rowData);
       });
       data.push(tableDataArr);
@@ -72,6 +76,9 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
     return data;
   });
+
+  // const data = JSON.parse(await fs.readFile("./data.json", "utf-8")) as any[][];
+  // await fs.writeFile("./data.json", data, "utf-8");
 
   return {
     props: { data },
