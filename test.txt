@@ -14,4 +14,7 @@
  a b 
 
  a b c
- 
+
+ delCol = []
+
+ arr =[[1,2,4],[a,b,d],[q,w,r]]

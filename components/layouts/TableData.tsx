@@ -7,54 +7,130 @@ interface Props {
 
 interface IUndoObj {
   index: number;
-  row: any;
+  data: any[];
+  type: "row" | "col";
 }
+
+// [[1,2,4],[a,b,d],[q,w,r]]
+// the inner arrays are the rows
 
 const TableData: React.FC<Props> = ({ data }) => {
   const [stateData, setStateDate] = useState(data);
   const [undoData, setUndoData] = useState<Array<IUndoObj>>([]);
 
+  const [inputData, setInput] = useState("");
+  const [replaceData, setReplaceInput] = useState("");
+
   const handleRowDelete = (id: number) => {
     setStateDate((prev) => prev.filter((_, index) => index != id));
-    setUndoData([...undoData, { index: id, row: stateData[id] }]);
+    setUndoData([...undoData, { index: id, data: stateData[id], type: "row" }]);
   };
 
-  /*
-    step1 : Collect the previous index 
-      (when do u collect it?): When the user deletes a row
-      (how do you store the element and index?): The element and index is stored in a object. This object will also be stored in an array
-    step2 : when undoed, pop the object thats infront of the array, since the object is the most recent update.
+  // [1,2,3,4]
+
+  const handleColDelete = (id: number) => {
+    const delCol: any[] = [];
+
+    const newArr = stateData.map((row) => {
+      delCol.push(row.splice(id, 1)[0]);
+      return row;
+    });
+
+    setStateDate(newArr);
+    setUndoData([...undoData, { index: id, data: delCol, type: "col" }]);
+
+    // setStateDate((prev) =>
+    //   prev.map((row) => {
+    //     row.splice(id, 1);
+    //     console.log(row);
+    //     return row;
+    //   })
+    // );
+  };
+
+  /* 
+
+   When user clicks on undo return the row or col
+
+    step 1: Anytime a user deletes a col or row collect the data. Obtain the index of row or col and the data
+      (How do can we tell from a column and a row?): In the row handler initialize the row type. With the column handler initialize the column type.
+    step 2: When user clicks on undo return the most recent deleted row or col
+      (What happens when most recent data was a row?):We can access through the table row and return the row.
+      (What happens when the most recent data was a column?):We can access through the table column and return the column.
+
   */
 
-  // const handleRowUndo = (id: number) => {
-  //   setUndoData([{index: id , row: data[id]}]);
-  // };
+  const handleUndo = () => {
+    const undoEl = undoData.pop();
 
-  const handleRowUndo = () => {
-    const undoRow = undoData.pop();
+    if (!undoEl) return;
 
-    if (!undoRow) return;
+    if (undoEl.type === "col")
+      stateData.forEach((row: any) => {
+        let restoreItem = undoEl.data.shift();
+        row.splice(undoEl.index, 0, restoreItem);
+      });
 
-    stateData.splice(undoRow.index, 0, undoRow.row);
+    if (undoEl.type == "row") stateData.splice(undoEl.index, 0, undoEl.data);
 
     setStateDate([...stateData]);
     setUndoData([...undoData]);
   };
 
+  /*
+    Step 1: Obtain data from the left input and the right input
+      (How are we going to obtain this data?): 
+    Step 2: Find the words through each array and change that word into the replace word 
+  */
+
+  const replace = (searchWord: string, replaceWord: string) => {
+    stateData.forEach((row) => {
+      row.map((element, index) => {
+        if (String(element).match(searchWord)) {
+          row[index] = String(row[index]).replace(searchWord, replaceWord);
+        }
+      });
+    });
+
+    setStateDate([...stateData]);
+  };
+
   return (
     <div>
       <div>
-        <button onClick={handleRowUndo}>Undo</button>
+        <button onClick={handleUndo}>Undo</button>
+        <input
+          onChange={(e) => setInput(e.target.value)}
+          type="text"
+          className="border-2 border-black"
+        />
+        <input
+          onChange={(e) => setReplaceInput(e.target.value)}
+          type="text"
+          className="border-2 border-black"
+        />
+        <button onClick={() => replace(inputData, replaceData)}>replace</button>
       </div>
       <table className="my-10">
         <tbody>
+          {/*  */}
           {stateData[0] && (
             <tr>
+              <td></td>
               {stateData[0].map((_, index) => (
-                <td key={index}>-</td>
+                <td
+                  onClick={() => {
+                    handleColDelete(index);
+                  }}
+                  className="cursor-pointer"
+                  key={index}
+                >
+                  - {index}
+                </td>
               ))}
             </tr>
           )}
+
           {stateData.map((tr, index) => (
             <TableRow id={index} handleRowDelete={handleRowDelete} key={index}>
               {tr.map((td, index) => (
