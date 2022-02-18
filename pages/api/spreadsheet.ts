@@ -28,10 +28,23 @@ export default async function handler(
   const sheetName = req.body.sheetName;
   const data = req.body.data;
 
+  if (!sheetName || !data) res.status(400).send("missing parameters");
+
+  try {
+    await sheets.spreadsheets.batchUpdate({
+      spreadsheetId,
+      requestBody: {
+        requests: [{ addSheet: { properties: { title: sheetName } } }],
+      },
+    });
+  } catch (e) {
+    console.log(e);
+  }
+
   const googleSheetsOptions = {
     auth,
     spreadsheetId: process.env["SHEET_ID"],
-    range: `${sheetName}!A:${String.fromCharCode(65 + data[0].length)}`,
+    range: `${sheetName}!A:${String.fromCharCode(65 + data[0].length - 1)}`,
     valueInputOption: "USER_ENTERED",
     resource: { values: data },
   };

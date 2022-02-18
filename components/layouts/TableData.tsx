@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import TableRow from "#/components/common/TableRow";
+import axios from "axios";
 
 interface Props {
   data: any[][];
@@ -11,8 +12,6 @@ interface IUndoObj {
   type: "row" | "col" | "replace";
 }
 
-
-
 // [[1,2,4],[a,b,d],[q,w,r]]
 // the inner arrays are the rows
 
@@ -22,6 +21,8 @@ const TableData: React.FC<Props> = ({ data }) => {
 
   const [inputData, setInput] = useState("");
   const [replaceData, setReplaceInput] = useState("");
+
+  const sheetRef = useRef<HTMLInputElement>(null);
 
   const handleRowDelete = (id: number) => {
     setStateDate((prev) => prev.filter((_, index) => index != id));
@@ -75,14 +76,17 @@ const TableData: React.FC<Props> = ({ data }) => {
 
     if (undoEl.type == "row") stateData.splice(undoEl.index, 0, undoEl.data);
 
-    if(undoEl.type == "replace"){
+    if (undoEl.type == "replace") {
       stateData.forEach((row) => {
         row.map((element, index) => {
-          if(String(element).match(undoEl.data[1])){
-            row[index] = String(row[index]).replace(undoEl.data[1],undoEl.data[0]);
+          if (String(element).match(undoEl.data[1])) {
+            row[index] = String(row[index]).replace(
+              undoEl.data[1],
+              undoEl.data[0]
+            );
           }
-        })
-      })
+        });
+      });
     }
 
     setStateDate([...stateData]);
@@ -96,7 +100,7 @@ const TableData: React.FC<Props> = ({ data }) => {
   */
 
   const replace = (searchWord: string, replaceWord: string) => {
-    const undoReplaceItem = [searchWord,replaceWord];
+    const undoReplaceItem = [searchWord, replaceWord];
     stateData.forEach((row) => {
       row.map((element, index) => {
         if (String(element).match(searchWord)) {
@@ -106,7 +110,10 @@ const TableData: React.FC<Props> = ({ data }) => {
     });
 
     setStateDate([...stateData]);
-    setUndoData([...undoData, {index:0, data:undoReplaceItem, type:"replace"}]);
+    setUndoData([
+      ...undoData,
+      { index: 0, data: undoReplaceItem, type: "replace" },
+    ]);
   };
 
   return (
@@ -124,6 +131,17 @@ const TableData: React.FC<Props> = ({ data }) => {
           className="border-2 border-black"
         />
         <button onClick={() => replace(inputData, replaceData)}>replace</button>
+        <input type="text" className="border-2 border-black" ref={sheetRef} />
+        <button
+          onClick={async () => {
+            const res = await axios.post("/api/spreadsheet", {
+              data: stateData,
+              sheetName: sheetRef.current?.value || "Trash",
+            });
+          }}
+        >
+          Add table
+        </button>
       </div>
       <table className="my-10">
         <tbody>
