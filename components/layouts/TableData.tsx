@@ -8,8 +8,10 @@ interface Props {
 interface IUndoObj {
   index: number;
   data: any[];
-  type: "row" | "col";
+  type: "row" | "col" | "replace";
 }
+
+
 
 // [[1,2,4],[a,b,d],[q,w,r]]
 // the inner arrays are the rows
@@ -73,6 +75,16 @@ const TableData: React.FC<Props> = ({ data }) => {
 
     if (undoEl.type == "row") stateData.splice(undoEl.index, 0, undoEl.data);
 
+    if(undoEl.type == "replace"){
+      stateData.forEach((row) => {
+        row.map((element, index) => {
+          if(String(element).match(undoEl.data[1])){
+            row[index] = String(row[index]).replace(undoEl.data[1],undoEl.data[0]);
+          }
+        })
+      })
+    }
+
     setStateDate([...stateData]);
     setUndoData([...undoData]);
   };
@@ -84,6 +96,7 @@ const TableData: React.FC<Props> = ({ data }) => {
   */
 
   const replace = (searchWord: string, replaceWord: string) => {
+    const undoReplaceItem = [searchWord,replaceWord];
     stateData.forEach((row) => {
       row.map((element, index) => {
         if (String(element).match(searchWord)) {
@@ -93,6 +106,7 @@ const TableData: React.FC<Props> = ({ data }) => {
     });
 
     setStateDate([...stateData]);
+    setUndoData([...undoData, {index:0, data:undoReplaceItem, type:"replace"}]);
   };
 
   return (
