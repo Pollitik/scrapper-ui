@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import TableRow from "#/components/common/TableRow";
 
 interface Props {
@@ -11,8 +11,6 @@ interface IUndoObj {
   type: "row" | "col" | "replace";
 }
 
-
-
 // [[1,2,4],[a,b,d],[q,w,r]]
 // the inner arrays are the rows
 
@@ -22,6 +20,9 @@ const TableData: React.FC<Props> = ({ data }) => {
 
   const [inputData, setInput] = useState("");
   const [replaceData, setReplaceInput] = useState("");
+
+  const currentStyle = useRef("white");
+  const currentDraggedItem = useRef("");
 
   const handleRowDelete = (id: number) => {
     setStateDate((prev) => prev.filter((_, index) => index != id));
@@ -40,14 +41,6 @@ const TableData: React.FC<Props> = ({ data }) => {
 
     setStateDate(newArr);
     setUndoData([...undoData, { index: id, data: delCol, type: "col" }]);
-
-    // setStateDate((prev) =>
-    //   prev.map((row) => {
-    //     row.splice(id, 1);
-    //     console.log(row);
-    //     return row;
-    //   })
-    // );
   };
 
   /* 
@@ -75,14 +68,17 @@ const TableData: React.FC<Props> = ({ data }) => {
 
     if (undoEl.type == "row") stateData.splice(undoEl.index, 0, undoEl.data);
 
-    if(undoEl.type == "replace"){
+    if (undoEl.type == "replace") {
       stateData.forEach((row) => {
         row.map((element, index) => {
-          if(String(element).match(undoEl.data[1])){
-            row[index] = String(row[index]).replace(undoEl.data[1],undoEl.data[0]);
+          if (String(element).match(undoEl.data[1])) {
+            row[index] = String(row[index]).replace(
+              undoEl.data[1],
+              undoEl.data[0]
+            );
           }
-        })
-      })
+        });
+      });
     }
 
     setStateDate([...stateData]);
@@ -96,7 +92,7 @@ const TableData: React.FC<Props> = ({ data }) => {
   */
 
   const replace = (searchWord: string, replaceWord: string) => {
-    const undoReplaceItem = [searchWord,replaceWord];
+    const undoReplaceItem = [searchWord, replaceWord];
     stateData.forEach((row) => {
       row.map((element, index) => {
         if (String(element).match(searchWord)) {
@@ -106,8 +102,83 @@ const TableData: React.FC<Props> = ({ data }) => {
     });
 
     setStateDate([...stateData]);
-    setUndoData([...undoData, {index:0, data:undoReplaceItem, type:"replace"}]);
+    setUndoData([
+      ...undoData,
+      { index: 0, data: undoReplaceItem, type: "replace" },
+    ]);
   };
+
+  /*
+  Goal:Drag and Drop row onto another row. Then switch
+    step 1: Click and hold on the row
+      What happens when you click and drag the row?(The row index is collected)
+
+
+      What are the animations when there is a click and hold on the row?(row is turned green)
+        What happens when you click and hold on another row , when another row was already clicked?(check for change in id)
+          How do you check for change in ID?(Comapre two variables. One variable containing the last cliked row and the other variable containing the current clicked row)
+      
+      
+    step 2: Drag the row to another row or (col)
+      What happens when you drag the element on another onto to the other same element?(pull the index of the dropped on element. Then switch the row)
+
+*/
+
+  const onDragRowStart = (index: number, e: React.DragEvent) => {
+    //Where I obtain the dragged item
+    const target = e.target;
+    e.dataTransfer?.setData("id", String(index));
+    currentDraggedItem.current = "row";
+
+    // console.log("Drag Start on Row");
+    // console.log("Dragged Item Index" + index);
+    console.log(currentDraggedItem.current);
+  };
+
+
+  const onDragColStart = (index : number, e:React.DragEvent) => {
+    const target = e.target;
+    e.dataTransfer.setData("id", String(index));
+
+    currentDraggedItem.current = "col";
+
+    console.log(currentDraggedItem.current);
+  }
+
+  const onDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const onDragEnd = () => {
+    //This is where we clear the animations
+    console.log("Drag End");
+  };
+
+  const onDropped = (droppedIndex: number, e: React.DragEvent) => {
+    //Where we switch the dragged item with the item that was dropped on
+    //Add a functionnality to check if the dragged item type(col or row) matches with the dropped item type
+    console.log("Dropped");
+
+    var data: number = +e.dataTransfer.getData("id");
+    var droppedIndexItem = stateData[droppedIndex];
+
+    if(currentDraggedItem.current === "col"){
+      var temp:any = "";
+      stateData.forEach((row) => {
+        temp = row[data];
+        row[data] = row[droppedIndex]
+        row[droppedIndex] = temp
+      })
+      setStateDate([...stateData]);
+    }
+
+    if(currentDraggedItem.current === "row"){
+      stateData[droppedIndex] = stateData[data];
+      stateData[data] = droppedIndexItem;
+      setStateDate([...stateData]);
+    }
+  };
+
 
   return (
     <div>
@@ -133,6 +204,10 @@ const TableData: React.FC<Props> = ({ data }) => {
               <td></td>
               {stateData[0].map((_, index) => (
                 <td
+                  draggable
+                  onDragStart={(e:React.DragEvent) => onDragColStart(index,e)}
+                  onDrop={(e:React.DragEvent) => onDropped(index,e)}
+                  onDragOver={(e:React.DragEvent) => onDragOver(e)}
                   onClick={() => {
                     handleColDelete(index);
                   }}
@@ -146,7 +221,17 @@ const TableData: React.FC<Props> = ({ data }) => {
           )}
 
           {stateData.map((tr, index) => (
-            <TableRow id={index} handleRowDelete={handleRowDelete} key={index}>
+            <TableRow
+              id={index}
+              handleRowDelete={handleRowDelete}
+              onDragOver={onDragOver}
+              onDragStart={onDragRowStart}
+              onDrop={onDropped}
+              onDragEnd={onDragEnd}
+              key={index}
+              setStyle={currentStyle.current}
+              
+            >
               {tr.map((td, index) => (
                 <td className="px-2" key={index}>
                   {td}
