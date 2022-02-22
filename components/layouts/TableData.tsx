@@ -1,5 +1,8 @@
+
 import React, { useState, useRef } from "react";
+
 import TableRow from "#/components/common/TableRow";
+import axios from "axios";
 
 interface Props {
   data: any[][];
@@ -21,8 +24,10 @@ const TableData: React.FC<Props> = ({ data }) => {
   const [inputData, setInput] = useState("");
   const [replaceData, setReplaceInput] = useState("");
 
+
   const currentStyle = useRef("white");
   const currentDraggedItem = useRef("");
+
 
   const handleRowDelete = (id: number) => {
     setStateDate((prev) => prev.filter((_, index) => index != id));
@@ -106,6 +111,7 @@ const TableData: React.FC<Props> = ({ data }) => {
       ...undoData,
       { index: 0, data: undoReplaceItem, type: "replace" },
     ]);
+
   };
 
   /*
@@ -133,6 +139,7 @@ const TableData: React.FC<Props> = ({ data }) => {
     // console.log("Drag Start on Row");
     // console.log("Dragged Item Index" + index);
     console.log(currentDraggedItem.current);
+
   };
 
 
@@ -195,6 +202,17 @@ const TableData: React.FC<Props> = ({ data }) => {
           className="border-2 border-black"
         />
         <button onClick={() => replace(inputData, replaceData)}>replace</button>
+        <input type="text" className="border-2 border-black" ref={sheetRef} />
+        <button
+          onClick={async () => {
+            const res = await axios.post("/api/spreadsheet", {
+              data: stateData,
+              sheetName: sheetRef.current?.value || "Trash",
+            });
+          }}
+        >
+          Add table
+        </button>
       </div>
       <table className="my-10">
         <tbody>
