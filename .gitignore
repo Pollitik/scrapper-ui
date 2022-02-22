@@ -7,9 +7,6 @@
 
 /.yarn/
 
-secrets.json
-.env.local
-
 # testing
 /coverage
 
