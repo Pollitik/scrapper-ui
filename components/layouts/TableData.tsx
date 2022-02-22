@@ -1,6 +1,4 @@
-
 import React, { useState, useRef } from "react";
-
 import TableRow from "#/components/common/TableRow";
 import axios from "axios";
 
@@ -23,11 +21,10 @@ const TableData: React.FC<Props> = ({ data }) => {
 
   const [inputData, setInput] = useState("");
   const [replaceData, setReplaceInput] = useState("");
-
+  const sheetRef = useRef<HTMLInputElement>(null);
 
   const currentStyle = useRef("white");
   const currentDraggedItem = useRef("");
-
 
   const handleRowDelete = (id: number) => {
     setStateDate((prev) => prev.filter((_, index) => index != id));
@@ -111,7 +108,6 @@ const TableData: React.FC<Props> = ({ data }) => {
       ...undoData,
       { index: 0, data: undoReplaceItem, type: "replace" },
     ]);
-
   };
 
   /*
@@ -139,18 +135,16 @@ const TableData: React.FC<Props> = ({ data }) => {
     // console.log("Drag Start on Row");
     // console.log("Dragged Item Index" + index);
     console.log(currentDraggedItem.current);
-
   };
 
-
-  const onDragColStart = (index : number, e:React.DragEvent) => {
+  const onDragColStart = (index: number, e: React.DragEvent) => {
     const target = e.target;
     e.dataTransfer.setData("id", String(index));
 
     currentDraggedItem.current = "col";
 
     console.log(currentDraggedItem.current);
-  }
+  };
 
   const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -169,23 +163,22 @@ const TableData: React.FC<Props> = ({ data }) => {
     var data: number = +e.dataTransfer.getData("id");
     var droppedIndexItem = stateData[droppedIndex];
 
-    if(currentDraggedItem.current === "col"){
-      var temp:any = "";
+    if (currentDraggedItem.current === "col") {
+      var temp: any = "";
       stateData.forEach((row) => {
         temp = row[data];
-        row[data] = row[droppedIndex]
-        row[droppedIndex] = temp
-      })
+        row[data] = row[droppedIndex];
+        row[droppedIndex] = temp;
+      });
       setStateDate([...stateData]);
     }
 
-    if(currentDraggedItem.current === "row"){
+    if (currentDraggedItem.current === "row") {
       stateData[droppedIndex] = stateData[data];
       stateData[data] = droppedIndexItem;
       setStateDate([...stateData]);
     }
   };
-
 
   return (
     <div>
@@ -223,9 +216,9 @@ const TableData: React.FC<Props> = ({ data }) => {
               {stateData[0].map((_, index) => (
                 <td
                   draggable
-                  onDragStart={(e:React.DragEvent) => onDragColStart(index,e)}
-                  onDrop={(e:React.DragEvent) => onDropped(index,e)}
-                  onDragOver={(e:React.DragEvent) => onDragOver(e)}
+                  onDragStart={(e: React.DragEvent) => onDragColStart(index, e)}
+                  onDrop={(e: React.DragEvent) => onDropped(index, e)}
+                  onDragOver={(e: React.DragEvent) => onDragOver(e)}
                   onClick={() => {
                     handleColDelete(index);
                   }}
@@ -248,7 +241,6 @@ const TableData: React.FC<Props> = ({ data }) => {
               onDragEnd={onDragEnd}
               key={index}
               setStyle={currentStyle.current}
-              
             >
               {tr.map((td, index) => (
                 <td className="px-2" key={index}>
