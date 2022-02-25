@@ -27,6 +27,7 @@ const TableRow: React.FC<Props> = ({
       onDragStart={(event: React.DragEvent) => onDragStart(id, event)}
       onDragEnd={() => onDragEnd()}
       className="my-2 cursor-pointer"
+      id={""+id}
    
     >
       <i

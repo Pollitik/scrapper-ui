@@ -3,26 +3,29 @@ import TableRow from "#/components/common/TableRow";
 
 interface Props {
   data: any[][];
+  id: String;
 }
 
 interface IUndoObj {
   index: number;
   data: any[];
-  type: "row" | "col" | "replace";
+  type: "row" | "col" | "replace" | "drag-col" | "drag-row";
 }
 
 // [[1,2,4],[a,b,d],[q,w,r]]
 // the inner arrays are the rows
 
-const TableData: React.FC<Props> = ({ data }) => {
+const TableData: React.FC<Props> = ({ data, id }) => {
   const [stateData, setStateDate] = useState(data);
   const [undoData, setUndoData] = useState<Array<IUndoObj>>([]);
 
   const [inputData, setInput] = useState("");
   const [replaceData, setReplaceInput] = useState("");
 
-  const currentStyle = useRef("white");
   const currentDraggedItem = useRef("");
+  const currentFilter = useRef("");
+
+  const currentStyle = useRef("");
 
   const handleRowDelete = (id: number) => {
     setStateDate((prev) => prev.filter((_, index) => index != id));
@@ -57,6 +60,8 @@ const TableData: React.FC<Props> = ({ data }) => {
 
   const handleUndo = () => {
     const undoEl = undoData.pop();
+    const number = new RegExp("(>|=|<)");
+    let number2 = "";
 
     if (!undoEl) return;
 
@@ -69,20 +74,107 @@ const TableData: React.FC<Props> = ({ data }) => {
     if (undoEl.type == "row") stateData.splice(undoEl.index, 0, undoEl.data);
 
     if (undoEl.type == "replace") {
-      stateData.forEach((row) => {
-        row.map((element, index) => {
-          if (String(element).match(undoEl.data[1])) {
+      let filter = undoEl?.data[2];
+      for (let a = 0; a <= filter.length; a++) {
+        if (number.test(filter)) {
+          filter = filter.slice(1);
+        }
+      }
+
+      if (currentFilter.current.length !== 0) {
+        stateData.forEach((row) => {
+          row.map((element, index) => {
+            number2 =
+              row[index].length == 3
+                ? row[index].substring(0, 2)
+                : row[index].substring(0, 1);
+            if (
+              String(element).match(undoEl.data[1]) &&
+              undoEl.data[2][0] === "<" &&
+              undoEl.data[2][1] === "="
+            ) {
+              if (Number(number2) <= Number(filter)) {
+                row[index] = String(row[index]).replace(
+                  undoEl.data[1],
+                  undoEl.data[0]
+                );
+              }
+            } else if (
+              String(element).match(undoEl.data[1]) &&
+              undoEl.data[2][0] === ">" &&
+              undoEl.data[2][1] === "="
+            ) {
+              if (Number(number2) >= Number(filter)) {
+                row[index] = String(row[index]).replace(
+                  undoEl.data[1],
+                  undoEl.data[0]
+                );
+              }
+            } else if (
+              String(element).match(undoEl.data[1]) &&
+              undoEl.data[0][0] === "="
+            ) {
+              if (Number(number2) === Number(filter)) {
+                row[index] = String(row[index]).replace(
+                  undoEl.data[1],
+                  undoEl.data[0]
+                );
+              }
+            } else if (
+              String(element).match(undoEl.data[1]) &&
+              undoEl.data[2][0] === "<"
+            ) {
+              if (Number(number2) < Number(filter)) {
+                row[index] = String(row[index]).replace(
+                  undoEl.data[1],
+                  undoEl.data[0]
+                );
+              }
+            } else if (
+              String(element).match(undoEl.data[1]) &&
+              undoEl.data[2][0] === ">"
+            ) {
+              if (Number(number2) > Number(filter)) {
+                row[index] = String(row[index]).replace(
+                  undoEl.data[1],
+                  undoEl.data[0]
+                );
+              }
+            }
+          });
+        });
+      } else {
+        stateData.forEach((row) => {
+          row.map((element, index) => {
             row[index] = String(row[index]).replace(
               undoEl.data[1],
               undoEl.data[0]
             );
-          }
+          });
         });
+      }
+    }
+
+    if (undoEl.type == "drag-row") {
+      const droppedItem = stateData[undoEl.data[1]];
+      stateData[undoEl.data[1]] = stateData[undoEl.data[0]];
+      stateData[undoEl.data[0]] = droppedItem;
+      console.log("Check");
+    }
+
+    if (undoEl.type == "drag-col") {
+      var temp: any = "";
+      stateData.forEach((row) => {
+        temp = row[undoEl.data[1]];
+        row[undoEl.data[1]] = row[undoEl.data[0]];
+        row[undoEl.data[0]] = temp;
       });
     }
 
     setStateDate([...stateData]);
     setUndoData([...undoData]);
+
+    console.log(undoData);
   };
 
   /*
@@ -91,13 +183,61 @@ const TableData: React.FC<Props> = ({ data }) => {
     Step 2: Find the words through each array and change that word into the replace word 
   */
 
-  const replace = (searchWord: string, replaceWord: string) => {
-    const undoReplaceItem = [searchWord, replaceWord];
+  // const comparatorOperator = (operator:string) => {
+  //   if(operator.)
+  // }
+  const replace = (searchWord: string, replaceWord: string, filter: string) => {
+    const undoReplaceItem = [searchWord, replaceWord, filter];
+
+    // let number = "";
+    let number = "";
+    // let onlyNumber = "";
+    // const number3 = new RegExp("(>|=|<)");
+
     stateData.forEach((row) => {
       row.map((element, index) => {
         if (String(element).match(searchWord)) {
-          row[index] = String(row[index]).replace(searchWord, replaceWord);
+          number =
+            row[index].length == 3
+              ? row[index].substring(0, 2)
+              : row[index].substring(0, 1);
+
+          if (filter[0] === ">" || filter[0] === ">=") {
+            if (
+              Number(number) >= Number(filter.substring(2)) &&
+              filter[0] === ">" &&
+              filter[1] === "="
+            ) {
+              row[index] = String(row[index]).replace(searchWord, replaceWord);
+            } else if (
+              Number(number) > Number(filter.substring(1)) &&
+              filter[0] === ">"
+            ) {
+              row[index] = String(row[index]).replace(searchWord, replaceWord);
+            }
+          } else if (filter[0] === "<" || filter[0] === "<=") {
+            if (
+              Number(number) <= Number(filter.substring(2)) &&
+              filter[0] === "<" &&
+              filter[1] === "="
+            ) {
+              row[index] = String(row[index]).replace(searchWord, replaceWord);
+            } else if (
+              Number(number) < Number(filter.substring(1)) &&
+              filter[0] === "<"
+            ) {
+              row[index] = String(row[index]).replace(searchWord, replaceWord);
+            }
+          } else if (filter[0] === "=") {
+            if (Number(number) === Number(filter.substring(1))) {
+              row[index] = String(row[index]).replace(searchWord, replaceWord);
+            } else if (Number(number) === Number(filter.substring(2))) {
+              row[index] = String(row[index]).replace(searchWord, replaceWord);
+            }
+          }
         }
+
+        console.log(Number(number));
       });
     });
 
@@ -106,6 +246,8 @@ const TableData: React.FC<Props> = ({ data }) => {
       ...undoData,
       { index: 0, data: undoReplaceItem, type: "replace" },
     ]);
+
+    console.log(undoData);
   };
 
   /*
@@ -126,24 +268,23 @@ const TableData: React.FC<Props> = ({ data }) => {
 
   const onDragRowStart = (index: number, e: React.DragEvent) => {
     //Where I obtain the dragged item
-    const target = e.target;
     e.dataTransfer?.setData("id", String(index));
     currentDraggedItem.current = "row";
 
-    // console.log("Drag Start on Row");
-    // console.log("Dragged Item Index" + index);
+    var object = document.getElementById(`#${id}`);
+
+    object?.style.backgroundColor.replace("", "green");
+
     console.log(currentDraggedItem.current);
   };
 
-
-  const onDragColStart = (index : number, e:React.DragEvent) => {
+  const onDragColStart = (index: number, e: React.DragEvent) => {
     const target = e.target;
     e.dataTransfer.setData("id", String(index));
-
     currentDraggedItem.current = "col";
 
     console.log(currentDraggedItem.current);
-  }
+  };
 
   const onDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -151,6 +292,7 @@ const TableData: React.FC<Props> = ({ data }) => {
 
   const onDragEnd = () => {
     //This is where we clear the animations
+
     console.log("Drag End");
   };
 
@@ -162,26 +304,39 @@ const TableData: React.FC<Props> = ({ data }) => {
     var data: number = +e.dataTransfer.getData("id");
     var droppedIndexItem = stateData[droppedIndex];
 
-    if(currentDraggedItem.current === "col"){
-      var temp:any = "";
-      stateData.forEach((row) => {
-        temp = row[data];
-        row[data] = row[droppedIndex]
-        row[droppedIndex] = temp
-      })
+    if (
+      currentDraggedItem.current === "col" ||
+      currentDraggedItem.current === "row"
+    ) {
+      if (currentDraggedItem.current === "col") {
+        var temp: any = "";
+        stateData.forEach((row) => {
+          temp = row[data];
+          row[data] = row[droppedIndex];
+          row[droppedIndex] = temp;
+        });
+        setUndoData([
+          ...undoData,
+          { index: 0, data: [droppedIndex, data], type: "drag-col" },
+        ]);
+      }
+
+      if (currentDraggedItem.current === "row") {
+        stateData[droppedIndex] = stateData[data];
+        stateData[data] = droppedIndexItem;
+        setUndoData([
+          ...undoData,
+          { index: 0, data: [droppedIndex, data], type: "drag-row" },
+        ]);
+      }
       setStateDate([...stateData]);
     }
 
-    if(currentDraggedItem.current === "row"){
-      stateData[droppedIndex] = stateData[data];
-      stateData[data] = droppedIndexItem;
-      setStateDate([...stateData]);
-    }
+    console.log(stateData);
   };
 
-
   return (
-    <div>
+    <div className={"" + id}>
       <div>
         <button onClick={handleUndo}>Undo</button>
         <input
@@ -194,7 +349,16 @@ const TableData: React.FC<Props> = ({ data }) => {
           type="text"
           className="border-2 border-black"
         />
-        <button onClick={() => replace(inputData, replaceData)}>replace</button>
+        <input
+          type="text"
+          className="border-2 border-black"
+          onChange={(e) => (currentFilter.current = e.target.value)}
+        />
+        <button
+          onClick={() => replace(inputData, replaceData, currentFilter.current)}
+        >
+          replace
+        </button>
       </div>
       <table className="my-10">
         <tbody>
@@ -205,13 +369,13 @@ const TableData: React.FC<Props> = ({ data }) => {
               {stateData[0].map((_, index) => (
                 <td
                   draggable
-                  onDragStart={(e:React.DragEvent) => onDragColStart(index,e)}
-                  onDrop={(e:React.DragEvent) => onDropped(index,e)}
-                  onDragOver={(e:React.DragEvent) => onDragOver(e)}
+                  onDragStart={(e: React.DragEvent) => onDragColStart(index, e)}
+                  onDrop={(e: React.DragEvent) => onDropped(index, e)}
+                  onDragOver={(e: React.DragEvent) => onDragOver(e)}
                   onClick={() => {
                     handleColDelete(index);
                   }}
-                  className="cursor-pointer"
+                  className="cursor-pointer column"
                   key={index}
                 >
                   - {index}
@@ -230,7 +394,6 @@ const TableData: React.FC<Props> = ({ data }) => {
               onDragEnd={onDragEnd}
               key={index}
               setStyle={currentStyle.current}
-              
             >
               {tr.map((td, index) => (
                 <td className="px-2" key={index}>

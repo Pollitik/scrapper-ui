@@ -10,7 +10,7 @@ const scrape = ({
   return (
     <div className="flex flex-col justify-center items-center px-10">
       {data?.length &&
-        data.map((table, index) => <TableData key={index} data={table} />)}
+        data.map((table, index) => <TableData key={index} data={table} id={String(index)} />)}
     </div>
   );
 };
@@ -81,7 +81,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   // await fs.writeFile("./data.json", data, "utf-8");
 
   return {
-    props: { data },
+    props: { data},
   };
 };
 
