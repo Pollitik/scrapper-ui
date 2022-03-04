@@ -9,7 +9,7 @@ interface Props {
 interface IUndoObj {
   index: number;
   data: any[];
-  type: "row" | "col" | "replace" | "drag-col" | "drag-row";
+  type: "row" | "col" | "replace" | "replace_num" | "drag-col" | "drag-row";
 }
 
 // [[1,2,4],[a,b,d],[q,w,r]]
@@ -68,6 +68,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
     const number = new RegExp("(>|=|<)");
     // const numberwithCommas = new RegExp(`(${undoEl?.data[1]})`)
     let number2 = "";
+    let inds = undoEl?.data[1];
 
     if (!undoEl) return;
 
@@ -88,76 +89,6 @@ const TableData: React.FC<Props> = ({ data, id }) => {
         }
       }
 
-      if (currentFilter.current.length !== 0) {
-        stateData.forEach((row,rowIndex) => {
-          row.map((element, colIndex) => {
-            // if(numberwithCommas.test(row[index])){
-            //   number2 = row[index].replace(",","");
-            // }
-            // else{
-            //   number2 =
-            //   row[index].length == 3
-            //     ? row[index].substring(0, 2)
-            //     : row[index].substring(0, 1);
-            // }
-            // if (
-            //   String(element).match(undoEl.data[1]) &&
-            //   undoEl.data[2][0] === "<" &&
-            //   undoEl.data[2][1] === "="
-            // ) {
-            //   if (numsRef.current[rowIndex][colIndex] <= Number(filter)) {
-            //     row[colIndex] = String(row[colIndex]).replace(
-            //       undoEl.data[1],
-            //       undoEl.data[0]
-            //     );
-            //   }
-            // } 
-            if (
-              String(element).match(undoEl.data[1]) &&
-              undoEl.data[2][0] === ">" &&
-              undoEl.data[2][1] === "="
-            ) {
-              if (numsRef.current[rowIndex][colIndex] >= Number(filter)) {
-                row[colIndex] = String(row[colIndex]).replace(
-                  undoEl.data[1],
-                  undoEl.data[0]
-                );
-              }
-            } 
-            // else if (
-            //   String(element).match(undoEl.data[1]) &&
-            //   undoEl.data[0][0] === "="
-            // ) {
-            //   if (numsRef.current[rowIndex][colIndex] === Number(filter)) {
-            //     row[colIndex] = String(row[colIndex]).replace(
-            //       undoEl.data[1],
-            //       undoEl.data[0]
-            //     );
-            //   }
-            // } else if (
-            //   String(element).match(undoEl.data[1]) &&
-            //   undoEl.data[2][0] === "<"
-            // ) {
-            //   if (numsRef.current[rowIndex][colIndex] < Number(filter)) {
-            //     row[colIndex] = String(row[colIndex]).replace(
-            //       undoEl.data[1],
-            //       undoEl.data[0]
-            //     );
-            //   }
-            // } else if (
-            //   String(element).match(undoEl.data[1]) &&
-            //   undoEl.data[2][0] === ">"
-            // ) {
-            //   if (numsRef.current[rowIndex][colIndex] > Number(filter)) {
-            //     row[colIndex] = String(row[colIndex]).replace(
-            //       undoEl.data[1],
-            //       undoEl.data[0]
-            //     );
-            //   }
-            // }
-          });
-        });
-      } else {
         stateData.forEach((row) => {
           row.map((element, index) => {
             row[index] = String(row[index]).replace(
@@ -166,7 +97,18 @@ const TableData: React.FC<Props> = ({ data, id }) => {
             );
           });
         });
-      }
+      
+    }
+
+    if(undoEl.type == "replace_num"){
+      undoEl.data[1].forEach((element1:number[]) => {
+        stateData[element1[0]][element1[1]] = String(stateData[element1[0]][element1[1]]).replace(
+          undoEl.data[2],
+          undoEl.data[0]
+        )
+      })
+
+      console.log(undoEl.data[1]);
     }
 
     if (undoEl.type == "drag-row") {
@@ -204,51 +146,10 @@ const TableData: React.FC<Props> = ({ data, id }) => {
 
 
   const replace = (searchWord: string, replaceWord: string, filter: string) => {
-    const undoReplaceItem = [searchWord, replaceWord, filter];
-
-    let temp = "";
+    let undoReplaceItem:unknown[] = [];
+    let indicies:any[][] = [];
     let number = "";
-
-    const numberwithCommas = new RegExp(`(,)`);
-    // const numbersWithPercentages = new RegExp("(+ | )")
-
-    // const traceNumbers:number[][] = [];
-
-    // let nums:number[] = [];
-
-    // console.log(number);
-
-    // stateData.forEach((row) => {
-    //   row.map((element,index) => {
-    //     if(0 === 0){
-    //       // if(numberwithCommas.test(row[index])){
-    //       //   number = row[index].replace(",","");
-    //       //   nums.push(Number(number));
-    //       // }
-    //       // else{
-    //       //   // number =
-    //       //   // row[index].length == 3
-    //       //   //   ? row[index].substring(0, 2)
-    //       //   //   : row[index].substring(0, 1);
-    //         // number = row[index].replace(/(%)/,"");
-    //         // nums.push(Number(number))
-
-    //       // }
-    //       number = row[index].replace(/(%|,)/,"");
-    //       nums.push(Number(number))
-    //       console.log("Inputting Numbers");
-    //     }
-
-    //     // if(String(element).match(searchWord)){
-    //     //   row[index] = row[index].replace(searchWord,replaceWord);
-    //     // }
-    //   })
-    //   traceNumbers.push(nums);
-    //   nums = []
-    // })
-
   
-
 
         if(filter.length === 0){
           stateData.forEach((row) => {
@@ -258,69 +159,76 @@ const TableData: React.FC<Props> = ({ data, id }) => {
               }
             })
           })
-        
+          undoReplaceItem = [searchWord, replaceWord, filter];
+          setUndoData([
+            ...undoData,
+            { index: 0, data: undoReplaceItem, type: "replace" },
+          ]);
         }
         else{
-          numsRef.current.forEach((row ,rowIndex) => {
+          stateData.forEach((row ,rowIndex) => {
             row.forEach((element,colIndex) => {
               if (filter[0] === ">" || ( filter[0] === ">" && filter[1] === "=")){
                 if (
-                  element >= Number(filter.substring(2)) &&
+                  String(element).match(searchWord) &&
+                  (numsRef.current[rowIndex][colIndex] >= Number(filter.substring(2))) &&
                   filter[0] === ">" &&
                   filter[1] === "="
                 ) {
                   stateData[rowIndex][colIndex] = stateData[rowIndex][colIndex].replace(searchWord, replaceWord);
                   console.log(rowIndex,colIndex);
+                  indicies.push([rowIndex,colIndex]);
                 
                 } else if (
-                  element > Number(filter.substring(1)) &&
+                  String(element).match(searchWord) &&
+                  (numsRef.current[rowIndex][colIndex] > Number(filter.substring(2))) &&
                   filter[0] === ">"
                 ) {
                   stateData[rowIndex][colIndex] = String(stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
+                  indicies.push([rowIndex,colIndex]);
                 }
               } else if (filter[0] === "<" || filter[0] === "<=") {
                 if (
-                  element <= Number(filter.substring(2)) &&
+                  String(element).match(searchWord) &&
+                  (numsRef.current[rowIndex][colIndex] <= Number(filter.substring(2))) &&
                   filter[0] === "<" &&
                   filter[1] === "="
                 ) {
                   stateData[rowIndex][colIndex] = String(stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
+                  indicies.push([rowIndex,colIndex]);
                 } else if (
-                  element < Number(filter.substring(1)) &&
+                  String(element).match(searchWord) &&
+                  (numsRef.current[rowIndex][colIndex] < Number(filter.substring(2))) &&
                   filter[0] === "<"
                 ) {
                   stateData[rowIndex][colIndex] = String(  stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
+                  indicies.push([rowIndex,colIndex]);
                 }
               } else if (filter[0] === "=") {
-                if (element === Number(filter.substring(1))) {
+                if (String(element).match(searchWord) &&
+                (numsRef.current[rowIndex][colIndex] === Number(filter.substring(1)))) {
                   stateData[rowIndex][colIndex] = String( stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
-                } else if (Number(number) === Number(filter.substring(2))) {
-                  stateData[rowIndex][colIndex] = String(stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
-                }
+                  indicies.push([rowIndex,colIndex]);
+                } 
+                
+              
               }
             })
           })
+
+          undoReplaceItem = [searchWord,indicies,replaceWord,filter];
+          setUndoData([
+            ...undoData,
+            { index: 0, data: undoReplaceItem, type: "replace_num" },
+          ]);
         }
-
-        
-
-        
-
-         
-      
-
-     
-
-
-  //  console.log(stateData);
+        indicies = []
 
     setStateDate([...stateData]);
-    setUndoData([
-      ...undoData,
-      { index: 0, data: undoReplaceItem, type: "replace" },
-    ]);
+ 
 
     console.log(undoData);
+    console.log(indicies);
 
   };
 
@@ -344,7 +252,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
     //Where I obtain the dragged item
     e.dataTransfer?.setData("id", String(index));
     currentDraggedItem.current = "row";
-
+    
     var object = document.getElementById(`#${id}`);
 
     object?.style.backgroundColor.replace("", "green");
@@ -432,7 +340,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
   
     return () => {
       // console.log("Clean Up");
-      console.log(numsRef);
+     
     };
   },[stateData])
 
