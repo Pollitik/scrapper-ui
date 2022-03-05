@@ -410,9 +410,11 @@ const TableData: React.FC<Props> = ({ data, id }) => {
               setStyle={currentStyle.current}
             >
               {tr.map((td, index) => (
-                <td className="px-2" key={index}>
-                  {td}
-                </td>
+                <td
+                  dangerouslySetInnerHTML={{ __html: td }}
+                  className="px-2"
+                  key={index}
+                ></td>
               ))}
             </TableRow>
           ))}
