@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import TableRow from "#/components/common/TableRow";
+import axios from "axios";
 
 interface Props {
   data: any[][];
@@ -21,6 +22,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
 
   const [inputData, setInput] = useState("");
   const [replaceData, setReplaceInput] = useState("");
+  const sheetRef = useRef<HTMLInputElement>(null);
 
   const [numReplace, setNumReplace] = useState<Array<Number[]>>([]);
 
@@ -344,6 +346,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
     };
   },[stateData])
 
+
   return (
     <div className={"" + id}>
       <div>
@@ -358,6 +361,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
           type="text"
           className="border-2 border-black"
         />
+
         <input
           type="text"
           className="border-2 border-black"
@@ -367,6 +371,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
           onClick={() => replace(inputData, replaceData, currentFilter.current)}
         >
           replace
+
         </button>
       </div>
       <table className="my-10">
