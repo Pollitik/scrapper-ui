@@ -2,11 +2,11 @@ import React from "react";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import puppeteer from "puppeteer";
 import TableData from "#/components/layouts/TableData";
-import fs from "fs/promises";
 
 const scrape = ({
   data,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  console.log(data);
   return (
     <div className="flex flex-col justify-center items-center px-10">
       {data?.length &&
@@ -17,7 +17,6 @@ const scrape = ({
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const url = ctx.query.url as string;
-
   if (!url)
     return {
       redirect: {
@@ -26,7 +25,10 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       props: {},
     };
 
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox"],
+  });
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: "domcontentloaded" });
 
@@ -42,11 +44,14 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       const tableRows = table.querySelectorAll("tr");
       const tableDataArr: any[] = [];
       tableRows.forEach((tr) => {
-        const tableData = tr.querySelectorAll("td");
+        const tableHeader = tr.querySelectorAll("th");
+        let tableExist;
+        if (tableHeader.length) tableExist = tableHeader;
+        else tableExist = tr.querySelectorAll("td");
         const rowData: any[] = [];
-
-        tableData.forEach((td) => {
-          const boldTag = td.querySelector("b");
+        let aTag: HTMLAnchorElement | undefined;
+        tableExist.forEach((td) => {
+          const a = td.querySelector("a");
 
           if (td.dataset.sortValue) {
             const date = isDate(td.dataset.sortValue);
@@ -59,16 +64,17 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
             return;
           }
-
-          if (boldTag) {
-            rowData.push(boldTag.innerText);
-          } else {
-            rowData.push(td.innerText);
+          if (a) {
+            a.href = a.href;
+            a.target = "_blank";
+            aTag = a;
           }
+
+          rowData.push(td.innerText);
         });
 
         if (rowData.length == 0) return;
-
+        rowData.push(aTag?.href);
         tableDataArr.push(rowData);
       });
       data.push(tableDataArr);
