@@ -328,9 +328,12 @@ const TableData: React.FC<Props> = ({ data, id }) => {
 
     console.log("Inputting Numbers");
     stateData.forEach((row) => {
-      row.map((_,index) => {
-        number = row[index].replace(/[^0-9.A-Za-z//]/g,"");
-        nums.push(Number(number))
+      row.map((element,index) => {
+
+        if(element !== null){
+          number = row[index].replace(/[^0-9.A-Za-z//]/g,"");
+          nums.push(Number(number))
+        }
       })
       traceNumbers.push(nums);
       nums = []
@@ -338,7 +341,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
 
     
     numsRef.current = traceNumbers;
-
+    console.log(numsRef)
   
     return () => {
       // console.log("Clean Up");
@@ -409,12 +412,12 @@ const TableData: React.FC<Props> = ({ data, id }) => {
               key={index}
               setStyle={currentStyle.current}
             >
-              {tr.map((td, index) => (
+              {tr.map((element, index) => (
                 <td
-                  dangerouslySetInnerHTML={{ __html: td }}
+                  // dangerouslySetInnerHTML={{ __html: element }}
                   className="px-2"
                   key={index}
-                ></td>
+                >{element}</td>
               ))}
             </TableRow>
           ))}
