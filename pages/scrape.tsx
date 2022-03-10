@@ -69,6 +69,9 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
             a.target = "_blank";
             aTag = a;
           }
+          // if(td.innerText === undefined){
+          //   rowData.push("empty");
+          // }
 
           rowData.push(td.innerText);
         });

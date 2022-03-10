@@ -14,6 +14,7 @@ export default async function handler(
   const sheets = google.sheets({ version: "v4", auth });
   const spreadsheetId = process.env["SHEET_ID"];
 
+
   if (req.method == "GET") {
     const data = await sheets.spreadsheets.values.get({
       spreadsheetId,

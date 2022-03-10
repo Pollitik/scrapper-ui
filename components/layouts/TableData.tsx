@@ -1,6 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
+import TableDropDown from "../common/TableDropDrown";
 import TableRow from "#/components/common/TableRow";
-import axios from "axios";
+import googledrive from "../../pages/api/googledrive"
+
+
+import { google } from "googleapis";
+
+import axios, { AxiosResponse } from "axios";
+
+
 
 interface Props {
   data: any[][];
@@ -22,8 +30,9 @@ const TableData: React.FC<Props> = ({ data, id }) => {
 
   const [inputData, setInput] = useState("");
   const [replaceData, setReplaceInput] = useState("");
-  const sheetRef = useRef<HTMLInputElement>(null);
+  const [dropDownValuesData,setDropDownData] = useState<Array<any>>([]);
 
+  const sheetRef = useRef<HTMLInputElement>(null);
   const [numReplace, setNumReplace] = useState<Array<Number[]>>([]);
 
   const currentDraggedItem = useRef("");
@@ -45,10 +54,16 @@ const TableData: React.FC<Props> = ({ data, id }) => {
     const delCol: any[] = [];
 
     const newArr = stateData.map((row) => {
-      delCol.push(row.splice(id, 1)[0]);
+      if(row[id] === undefined){
+        delCol.push("")
+      }
+      else{
+        delCol.push(row.splice(id, 1)[0]);
+      }
       return row;
     });
 
+    
     setStateDate(newArr);
     setUndoData([...undoData, { index: id, data: delCol, type: "col" }]);
   };
@@ -319,6 +334,16 @@ const TableData: React.FC<Props> = ({ data, id }) => {
    
   };
 
+  /*
+    Objective: Add newly created google sheet into a specific folder
+      Step 1: Collect the id of the chosen folder and collect the meta file data of the created google sheets file
+        (How do we do that?): We can pull this data from the post we made to the server. With both google drive api and google sheets api
+  */
+
+  const addSheetIntoDriveFolder = () => {
+    
+  }
+
   useEffect(() => {
     let traceNumbers:number[][] = [];
     let nums:number[] = [];
@@ -341,7 +366,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
 
     
     numsRef.current = traceNumbers;
-    console.log(numsRef)
+    // console.log(numsRef)
   
     return () => {
       // console.log("Clean Up");
@@ -376,6 +401,58 @@ const TableData: React.FC<Props> = ({ data, id }) => {
           replace
 
         </button>
+        
+
+        <button
+          onClick={async () => {
+            const res = await axios.post("/api/spreadsheet", {
+              data: stateData,
+              sheetName: sheetRef.current?.value || "Trash",
+            });
+          }}
+        >
+          Add table
+          </button>
+          <input type="text" className="border-2 border-black" ref={sheetRef} />
+        {/* <TableDropDown data={async () => {
+          let conversionArray:any[] = []
+          const res = await axios.post("/api/googledrive", {
+            query:"'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents"
+          }).then((response) => {
+            conversionArray = response.data
+          })
+
+          // const conversionArray = Array(res.data);
+          return conversionArray
+        }}/> */}
+
+        <TableDropDown>
+          { 
+              dropDownValuesData?.map((element:any,index:any) => (
+                <option key={index}>{element.name}</option>
+              ))
+          }
+        </TableDropDown>
+        <button 
+        
+        onClick={(async () => {
+          const res = await axios.get("/api/googledrive", {
+            params: {
+              query:"'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents"
+            }
+          })
+          // console.log(Array(res.data));
+          setDropDownData(res.data)
+    
+          console.log(res);
+
+          console.log(dropDownValuesData)
+        })}
+        
+        >
+          Reload
+        </button>
+
       </div>
       <table className="my-10">
         <tbody>
