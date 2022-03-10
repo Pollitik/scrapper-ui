@@ -1,0 +1,5 @@
+first we select the country
+then we click add table
+we will go into the dir and check if the xl exists in the dir.
+if it does, we will get the meta data (the xl id) 
+once we get the id, we will use google sheet api and modify the sheet data using the xl id

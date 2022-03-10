@@ -1,7 +1,5 @@
 import { google } from "googleapis";
 import type { NextApiRequest, NextApiResponse } from "next";
-import FormData from "form-data";
-import { drive } from "googleapis/build/src/apis/drive";
 
 export default async function handler(
   req: NextApiRequest,
@@ -32,34 +30,30 @@ export default async function handler(
 
   var pageToken: any = null;
 
-
-
   const drive = google.drive({ version: "v3", auth });
   // const query = "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents";
 
-  const query2 = req.body.query
+  const query2 = req.body.query;
 
-
-
-  
-  async function list() { 
-    const response = drive.files.list(
-      {
+  async function list() {
+    const response = drive.files
+      .list({
         q: `${query2} and mimeType = 'application/vnd.google-apps.folder'`,
         pageSize: 200,
         fields: "nextPageToken, files(id,name)",
         spaces: "drive",
-        pageToken: pageToken
-      }).then((resApi) => {
-        switch(resApi.status){
+        pageToken: pageToken,
+      })
+      .then((resApi) => {
+        switch (resApi.status) {
           case 200:
             const folders = resApi.data.files;
             res.status(200).json(folders);
         }
-      })
+      });
   }
 
-  if(req.method === "POST"){
+  if (req.method === "POST") {
     list();
   }
 
@@ -67,8 +61,7 @@ export default async function handler(
 
   // }
 
-  if(req.method !== "POST"){
-    res.status(405).send("Only POST reuests allowed")
+  if (req.method !== "POST") {
+    res.status(405).send("Only POST reuests allowed");
   }
-  
 }

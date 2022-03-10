@@ -2,15 +2,23 @@ import React from "react";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import puppeteer from "puppeteer";
 import TableData from "#/components/layouts/TableData";
+import axios from "axios";
 
 const scrape = ({
   data,
+  countries,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  console.log(data);
   return (
     <div className="flex flex-col justify-center items-center px-10">
       {data?.length &&
-        data.map((table, index) => <TableData key={index} data={table} id={String(index)} />)}
+        data.map((table, index) => (
+          <TableData
+            countries={countries}
+            key={index}
+            data={table}
+            id={String(index)}
+          />
+        ))}
     </div>
   );
 };
@@ -86,11 +94,12 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     return data;
   });
 
-  // const data = JSON.parse(await fs.readFile("./data.json", "utf-8")) as any[][];
-  // await fs.writeFile("./data.json", data, "utf-8");
+  const res = await axios.post("http://localhost:3000/api/googledrive", {
+    query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
+  });
 
   return {
-    props: { data},
+    props: { data, countries: res.data },
   };
 };
 

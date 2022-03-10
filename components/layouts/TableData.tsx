@@ -1,18 +1,16 @@
 import React, { useState, useRef, useEffect } from "react";
 import TableDropDown from "../common/TableDropDrown";
 import TableRow from "#/components/common/TableRow";
-import googledrive from "../../pages/api/googledrive"
-
+import googledrive from "../../pages/api/googledrive";
 
 import { google } from "googleapis";
 
 import axios, { AxiosResponse } from "axios";
 
-
-
 interface Props {
   data: any[][];
   id: String;
+  countries: string[];
 }
 
 interface IUndoObj {
@@ -24,13 +22,13 @@ interface IUndoObj {
 // [[1,2,4],[a,b,d],[q,w,r]]
 // the inner arrays are the rows
 
-const TableData: React.FC<Props> = ({ data, id }) => {
+const TableData: React.FC<Props> = ({ data, id, countries }) => {
   const [stateData, setStateDate] = useState(data);
   const [undoData, setUndoData] = useState<Array<IUndoObj>>([]);
 
   const [inputData, setInput] = useState("");
   const [replaceData, setReplaceInput] = useState("");
-  const [dropDownValuesData,setDropDownData] = useState<Array<any>>([]);
+  const [dropDownValuesData, setDropDownData] = useState<Array<any>>([]);
 
   const sheetRef = useRef<HTMLInputElement>(null);
   const [numReplace, setNumReplace] = useState<Array<Number[]>>([]);
@@ -41,29 +39,23 @@ const TableData: React.FC<Props> = ({ data, id }) => {
 
   const currentStyle = useRef("");
 
-
- 
-
   const handleRowDelete = (id: number) => {
     setStateDate((prev) => prev.filter((_, index) => index != id));
     setUndoData([...undoData, { index: id, data: stateData[id], type: "row" }]);
   };
 
-
   const handleColDelete = (id: number) => {
     const delCol: any[] = [];
 
     const newArr = stateData.map((row) => {
-      if(row[id] === undefined){
-        delCol.push("")
-      }
-      else{
+      if (row[id] === undefined) {
+        delCol.push("");
+      } else {
         delCol.push(row.splice(id, 1)[0]);
       }
       return row;
     });
 
-    
     setStateDate(newArr);
     setUndoData([...undoData, { index: id, data: delCol, type: "col" }]);
   };
@@ -98,7 +90,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
     if (undoEl.type == "row") stateData.splice(undoEl.index, 0, undoEl.data);
 
     if (undoEl.type == "replace") {
-      let filter = undoEl?.data[2]; 
+      let filter = undoEl?.data[2];
 
       for (let a = 0; a <= filter.length; a++) {
         if (number.test(filter)) {
@@ -106,24 +98,22 @@ const TableData: React.FC<Props> = ({ data, id }) => {
         }
       }
 
-        stateData.forEach((row) => {
-          row.map((element, index) => {
-            row[index] = String(row[index]).replace(
-              undoEl.data[1],
-              undoEl.data[0]
-            );
-          });
+      stateData.forEach((row) => {
+        row.map((element, index) => {
+          row[index] = String(row[index]).replace(
+            undoEl.data[1],
+            undoEl.data[0]
+          );
         });
-      
+      });
     }
 
-    if(undoEl.type == "replace_num"){
-      undoEl.data[1].forEach((element1:number[]) => {
-        stateData[element1[0]][element1[1]] = String(stateData[element1[0]][element1[1]]).replace(
-          undoEl.data[2],
-          undoEl.data[0]
-        )
-      })
+    if (undoEl.type == "replace_num") {
+      undoEl.data[1].forEach((element1: number[]) => {
+        stateData[element1[0]][element1[1]] = String(
+          stateData[element1[0]][element1[1]]
+        ).replace(undoEl.data[2], undoEl.data[0]);
+      });
 
       console.log(undoEl.data[1]);
     }
@@ -160,93 +150,101 @@ const TableData: React.FC<Props> = ({ data, id }) => {
   //   if(operator.)
   // }
 
-
-
   const replace = (searchWord: string, replaceWord: string, filter: string) => {
-    let undoReplaceItem:unknown[] = [];
-    let indicies:any[][] = [];
+    let undoReplaceItem: unknown[] = [];
+    let indicies: any[][] = [];
     let number = "";
-  
 
-        if(filter.length === 0){
-          stateData.forEach((row) => {
-            row.forEach((element,index) => {
-              if(String(element).match(searchWord)){
-                row[index] = row[index].replace(searchWord,replaceWord);
-              }
-            })
-          })
-          undoReplaceItem = [searchWord, replaceWord, filter];
-          setUndoData([
-            ...undoData,
-            { index: 0, data: undoReplaceItem, type: "replace" },
-          ]);
-        }
-        else{
-          stateData.forEach((row ,rowIndex) => {
-            row.forEach((element,colIndex) => {
-              if (filter[0] === ">" || ( filter[0] === ">" && filter[1] === "=")){
-                if (
-                  String(element).match(searchWord) &&
-                  (numsRef.current[rowIndex][colIndex] >= Number(filter.substring(2))) &&
-                  filter[0] === ">" &&
-                  filter[1] === "="
-                ) {
-                  stateData[rowIndex][colIndex] = stateData[rowIndex][colIndex].replace(searchWord, replaceWord);
-                  console.log(rowIndex,colIndex);
-                  indicies.push([rowIndex,colIndex]);
-                
-                } else if (
-                  String(element).match(searchWord) &&
-                  (numsRef.current[rowIndex][colIndex] > Number(filter.substring(2))) &&
-                  filter[0] === ">"
-                ) {
-                  stateData[rowIndex][colIndex] = String(stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
-                  indicies.push([rowIndex,colIndex]);
-                }
-              } else if (filter[0] === "<" || filter[0] === "<=") {
-                if (
-                  String(element).match(searchWord) &&
-                  (numsRef.current[rowIndex][colIndex] <= Number(filter.substring(2))) &&
-                  filter[0] === "<" &&
-                  filter[1] === "="
-                ) {
-                  stateData[rowIndex][colIndex] = String(stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
-                  indicies.push([rowIndex,colIndex]);
-                } else if (
-                  String(element).match(searchWord) &&
-                  (numsRef.current[rowIndex][colIndex] < Number(filter.substring(2))) &&
-                  filter[0] === "<"
-                ) {
-                  stateData[rowIndex][colIndex] = String(  stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
-                  indicies.push([rowIndex,colIndex]);
-                }
-              } else if (filter[0] === "=") {
-                if (String(element).match(searchWord) &&
-                (numsRef.current[rowIndex][colIndex] === Number(filter.substring(1)))) {
-                  stateData[rowIndex][colIndex] = String( stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
-                  indicies.push([rowIndex,colIndex]);
-                } 
-                
-              
-              }
-            })
-          })
+    if (filter.length === 0) {
+      stateData.forEach((row) => {
+        row.forEach((element, index) => {
+          if (String(element).match(searchWord)) {
+            row[index] = row[index].replace(searchWord, replaceWord);
+          }
+        });
+      });
+      undoReplaceItem = [searchWord, replaceWord, filter];
+      setUndoData([
+        ...undoData,
+        { index: 0, data: undoReplaceItem, type: "replace" },
+      ]);
+    } else {
+      stateData.forEach((row, rowIndex) => {
+        row.forEach((element, colIndex) => {
+          if (filter[0] === ">" || (filter[0] === ">" && filter[1] === "=")) {
+            if (
+              String(element).match(searchWord) &&
+              numsRef.current[rowIndex][colIndex] >=
+                Number(filter.substring(2)) &&
+              filter[0] === ">" &&
+              filter[1] === "="
+            ) {
+              stateData[rowIndex][colIndex] = stateData[rowIndex][
+                colIndex
+              ].replace(searchWord, replaceWord);
+              console.log(rowIndex, colIndex);
+              indicies.push([rowIndex, colIndex]);
+            } else if (
+              String(element).match(searchWord) &&
+              numsRef.current[rowIndex][colIndex] >
+                Number(filter.substring(2)) &&
+              filter[0] === ">"
+            ) {
+              stateData[rowIndex][colIndex] = String(
+                stateData[rowIndex][colIndex]
+              ).replace(searchWord, replaceWord);
+              indicies.push([rowIndex, colIndex]);
+            }
+          } else if (filter[0] === "<" || filter[0] === "<=") {
+            if (
+              String(element).match(searchWord) &&
+              numsRef.current[rowIndex][colIndex] <=
+                Number(filter.substring(2)) &&
+              filter[0] === "<" &&
+              filter[1] === "="
+            ) {
+              stateData[rowIndex][colIndex] = String(
+                stateData[rowIndex][colIndex]
+              ).replace(searchWord, replaceWord);
+              indicies.push([rowIndex, colIndex]);
+            } else if (
+              String(element).match(searchWord) &&
+              numsRef.current[rowIndex][colIndex] <
+                Number(filter.substring(2)) &&
+              filter[0] === "<"
+            ) {
+              stateData[rowIndex][colIndex] = String(
+                stateData[rowIndex][colIndex]
+              ).replace(searchWord, replaceWord);
+              indicies.push([rowIndex, colIndex]);
+            }
+          } else if (filter[0] === "=") {
+            if (
+              String(element).match(searchWord) &&
+              numsRef.current[rowIndex][colIndex] ===
+                Number(filter.substring(1))
+            ) {
+              stateData[rowIndex][colIndex] = String(
+                stateData[rowIndex][colIndex]
+              ).replace(searchWord, replaceWord);
+              indicies.push([rowIndex, colIndex]);
+            }
+          }
+        });
+      });
 
-          undoReplaceItem = [searchWord,indicies,replaceWord,filter];
-          setUndoData([
-            ...undoData,
-            { index: 0, data: undoReplaceItem, type: "replace_num" },
-          ]);
-        }
-        indicies = []
+      undoReplaceItem = [searchWord, indicies, replaceWord, filter];
+      setUndoData([
+        ...undoData,
+        { index: 0, data: undoReplaceItem, type: "replace_num" },
+      ]);
+    }
+    indicies = [];
 
     setStateDate([...stateData]);
- 
 
     console.log(undoData);
     console.log(indicies);
-
   };
 
   /*
@@ -269,7 +267,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
     //Where I obtain the dragged item
     e.dataTransfer?.setData("id", String(index));
     currentDraggedItem.current = "row";
-    
+
     var object = document.getElementById(`#${id}`);
 
     object?.style.backgroundColor.replace("", "green");
@@ -330,8 +328,6 @@ const TableData: React.FC<Props> = ({ data, id }) => {
       }
       setStateDate([...stateData]);
     }
-
-   
   };
 
   /*
@@ -340,40 +336,34 @@ const TableData: React.FC<Props> = ({ data, id }) => {
         (How do we do that?): We can pull this data from the post we made to the server. With both google drive api and google sheets api
   */
 
-  const addSheetIntoDriveFolder = () => {
-    
-  }
+  const addSheetIntoDriveFolder = () => {};
 
   useEffect(() => {
-    let traceNumbers:number[][] = [];
-    let nums:number[] = [];
+    let traceNumbers: number[][] = [];
+    let nums: number[] = [];
     let number = "";
 
     // const regex = new RegExp(`(\W+)/g`);
 
     console.log("Inputting Numbers");
     stateData.forEach((row) => {
-      row.map((element,index) => {
-
-        if(element !== null){
-          number = row[index].replace(/[^0-9.A-Za-z//]/g,"");
-          nums.push(Number(number))
+      row.map((element, index) => {
+        if (element !== null) {
+          number = row[index].replace(/[^0-9.A-Za-z//]/g, "");
+          nums.push(Number(number));
         }
-      })
+      });
       traceNumbers.push(nums);
-      nums = []
+      nums = [];
     });
 
-    
     numsRef.current = traceNumbers;
     // console.log(numsRef)
-  
+
     return () => {
       // console.log("Clean Up");
-     
     };
-  },[stateData])
-
+  }, [stateData]);
 
   return (
     <div className={"" + id}>
@@ -399,9 +389,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
           onClick={() => replace(inputData, replaceData, currentFilter.current)}
         >
           replace
-
         </button>
-        
 
         <button
           onClick={async () => {
@@ -412,8 +400,8 @@ const TableData: React.FC<Props> = ({ data, id }) => {
           }}
         >
           Add table
-          </button>
-          <input type="text" className="border-2 border-black" ref={sheetRef} />
+        </button>
+        <input type="text" className="border-2 border-black" ref={sheetRef} />
         {/* <TableDropDown data={async () => {
           let conversionArray:any[] = []
           const res = await axios.post("/api/googledrive", {
@@ -426,31 +414,12 @@ const TableData: React.FC<Props> = ({ data, id }) => {
           return conversionArray
         }}/> */}
 
-        <TableDropDown>
-          { 
-              dropDownValuesData?.map((element:any,index:any) => (
-                <option key={index}>{element.name}</option>
-              ))
-          }
-        </TableDropDown>
-        <button 
-        
-        onClick={(async () => {
-          const res = await axios.post("/api/googledrive", {
-              query:"'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents"
-          })
-          // console.log(Array(res.data));
-          setDropDownData(res.data)
-    
-          console.log(res);
-
-          console.log(dropDownValuesData)
-        })}
-        
-        >
-          Reload
-        </button>
-
+        <select>
+          {countries.map((element: any, index: any) => (
+            <option key={index}>{element.name}</option>
+          ))}
+        </select>
+        <button>Reload</button>
       </div>
       <table className="my-10">
         <tbody>
@@ -492,7 +461,9 @@ const TableData: React.FC<Props> = ({ data, id }) => {
                   // dangerouslySetInnerHTML={{ __html: element }}
                   className="px-2"
                   key={index}
-                >{element}</td>
+                >
+                  {element}
+                </td>
               ))}
             </TableRow>
           ))}
