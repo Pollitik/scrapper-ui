@@ -37,7 +37,7 @@ export default async function handler(
   const drive = google.drive({ version: "v3", auth });
   // const query = "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents";
 
-  const query2 = req.query["query"]
+  const query2 = req.body.query
 
 
 
@@ -59,7 +59,7 @@ export default async function handler(
       })
   }
 
-  if(req.method === "GET"){
+  if(req.method === "POST"){
     list();
   }
 
@@ -71,10 +71,4 @@ export default async function handler(
     res.status(405).send("Only POST reuests allowed")
   }
   
-
-
-
-  
-
-
 }

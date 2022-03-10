@@ -436,10 +436,8 @@ const TableData: React.FC<Props> = ({ data, id }) => {
         <button 
         
         onClick={(async () => {
-          const res = await axios.get("/api/googledrive", {
-            params: {
+          const res = await axios.post("/api/googledrive", {
               query:"'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents"
-            }
           })
           // console.log(Array(res.data));
           setDropDownData(res.data)
