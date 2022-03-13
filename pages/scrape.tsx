@@ -3,6 +3,7 @@ import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import puppeteer from "puppeteer";
 import TableData from "#/components/layouts/TableData";
 import axios from "axios";
+import Link from "next/link";
 
 const scrape = ({
   data,
@@ -10,6 +11,15 @@ const scrape = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <div className="flex flex-col justify-center items-center px-10">
+      {/* <h1 style={{color:"black"}}>
+        <Link href="/"><a>Go Back</a></Link>
+      </h1> */}
+
+      <ul>
+        <li>
+          <Link href="/"><a style={{color:"black"}}>Go Back</a></Link>
+        </li>
+      </ul>
       {data?.length &&
         data.map((table, index) => (
           <TableData
@@ -78,7 +88,8 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
             
             aTag = a;
           }
-          rowData.push(td.innerText);
+          
+          rowData.push(td.innerText.replaceAll("\n","") && td.innerText.replaceAll(",",""));
         });
 
         if (rowData.length == 0) return;

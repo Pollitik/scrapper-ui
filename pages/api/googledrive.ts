@@ -43,6 +43,7 @@ export default async function handler(
         fields: "nextPageToken, files(id,name)",
         spaces: "drive",
         pageToken: pageToken,
+        orderBy: "name asc"
       })
       .then((resApi) => {
         switch (resApi.status) {

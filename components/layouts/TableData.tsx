@@ -1,8 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
-import TableDropDown from "../common/TableDropDrown";
 import TableRow from "#/components/common/TableRow";
-
-import { google } from "googleapis";
+import TableDropDown from "../common/TableDropDrown";
+import Link from "next/link";
 
 import axios, { AxiosResponse } from "axios";
 
@@ -35,7 +34,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
   const currentDraggedItem = useRef("");
   const currentFilter = useRef("");
   const numsRef = useRef<Array<Number[]>>([]);
-  const selectedFolder = useRef<any>("1Xb4zAkP6ytMvqVPFTFVxfdgM5bKeVGB0");
+  const selectedFolder = useRef<string>("1Xb4zAkP6ytMvqVPFTFVxfdgM5bKeVGB0");
 
   const currentStyle = useRef("");
 
@@ -362,9 +361,6 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     return () => {};
   }, [stateData]);
 
-  // useEffect(() => {
-  //   console.log(selectedFolder.current);
-  // },[selectedFolder.current])
 
   return (
     <div className={"" + id}>
@@ -396,18 +392,18 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
           onClick={async () => {
             const res = await axios.post("/api/spreadsheet", {
               data: stateData,
-              sheetName: "test10"
+              sheetName: sheetRef.current?.value || "trash"
             });
 
 
             const resGET = await axios.post("/api/test", {
               folderId: selectedFolder.current,
-              sheetName: "test10"
+              sheetName: sheetRef.current?.value || "trash"
             });
             console.log(res)
 
             console.log(resGET)
-           
+
           }}
         >
           Add table
@@ -419,7 +415,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
           onChange={(e:any) => {
 
             const selectFolder = document.getElementById(`${e.target.value}`);
-            selectedFolder.current = selectFolder?.getAttribute("data-id")
+            selectedFolder.current = String(selectFolder?.getAttribute("data-id"))
             console.log(selectedFolder.current)}}
         >
           {countries.map((element: any, index: any) => (
@@ -428,7 +424,6 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
             </option>
           ))}
         </select>
-        <button>Reload</button>
       </div>
       <table className="my-10">
         <tbody>

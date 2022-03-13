@@ -70,12 +70,17 @@ export default async function handler(
 
 
 
+
   sheet?.forEach((array)=> {
     csv += array.join(",");
     csv += "\n"
   })
 
-    await write.write(csv);
+    await fs.writeFile("test.csv", csv , (err) => {
+      console.log(err);
+    })
+
+    // await write.write(csv);
 
 
     console.log(csv);
