@@ -75,12 +75,9 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
           if (a) {
             a.href = a.href;
             a.target = "_blank";
+            
             aTag = a;
           }
-          // if(td.innerText === undefined){
-          //   rowData.push("empty");
-          // }
-
           rowData.push(td.innerText);
         });
 
@@ -97,6 +94,8 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const res = await axios.post("http://localhost:3000/api/googledrive", {
     query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
   });
+
+  console.log(res.data);
 
   return {
     props: { data, countries: res.data },

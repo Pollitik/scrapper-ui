@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import TableDropDown from "../common/TableDropDrown";
 import TableRow from "#/components/common/TableRow";
-import googledrive from "../../pages/api/googledrive";
 
 import { google } from "googleapis";
 
@@ -36,6 +35,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
   const currentDraggedItem = useRef("");
   const currentFilter = useRef("");
   const numsRef = useRef<Array<Number[]>>([]);
+  const selectedFolder = useRef<any>("1Xb4zAkP6ytMvqVPFTFVxfdgM5bKeVGB0");
 
   const currentStyle = useRef("");
 
@@ -358,12 +358,13 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     });
 
     numsRef.current = traceNumbers;
-    // console.log(numsRef)
 
-    return () => {
-      // console.log("Clean Up");
-    };
+    return () => {};
   }, [stateData]);
+
+  // useEffect(() => {
+  //   console.log(selectedFolder.current);
+  // },[selectedFolder.current])
 
   return (
     <div className={"" + id}>
@@ -395,28 +396,36 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
           onClick={async () => {
             const res = await axios.post("/api/spreadsheet", {
               data: stateData,
-              sheetName: sheetRef.current?.value || "Trash",
+              sheetName: "test10"
             });
+
+
+            const resGET = await axios.post("/api/test", {
+              folderId: selectedFolder.current,
+              sheetName: "test10"
+            });
+            console.log(res)
+
+            console.log(resGET)
+           
           }}
         >
           Add table
         </button>
         <input type="text" className="border-2 border-black" ref={sheetRef} />
-        {/* <TableDropDown data={async () => {
-          let conversionArray:any[] = []
-          const res = await axios.post("/api/googledrive", {
-            query:"'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents"
-          }).then((response) => {
-            conversionArray = response.data
-          })
 
-          // const conversionArray = Array(res.data);
-          return conversionArray
-        }}/> */}
+        <select
+          id="selectBox"
+          onChange={(e:any) => {
 
-        <select>
+            const selectFolder = document.getElementById(`${e.target.value}`);
+            selectedFolder.current = selectFolder?.getAttribute("data-id")
+            console.log(selectedFolder.current)}}
+        >
           {countries.map((element: any, index: any) => (
-            <option key={index}>{element.name}</option>
+            <option id={element.name} className="cursor-pointer"data-id={element.id} key={element.id}>
+              {element.name}
+            </option>
           ))}
         </select>
         <button>Reload</button>
