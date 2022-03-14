@@ -2,15 +2,33 @@ import React from "react";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import puppeteer from "puppeteer";
 import TableData from "#/components/layouts/TableData";
+import axios from "axios";
+import Link from "next/link";
 
 const scrape = ({
   data,
+  countries,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
-  console.log(data);
   return (
     <div className="flex flex-col justify-center items-center px-10">
+      {/* <h1 style={{color:"black"}}>
+        <Link href="/"><a>Go Back</a></Link>
+      </h1> */}
+
+      <ul>
+        <li>
+          <Link href="/"><a style={{color:"black"}}>Go Back</a></Link>
+        </li>
+      </ul>
       {data?.length &&
-        data.map((table, index) => <TableData key={index} data={table} id={String(index)} />)}
+        data.map((table, index) => (
+          <TableData
+            countries={countries}
+            key={index}
+            data={table}
+            id={String(index)}
+          />
+        ))}
     </div>
   );
 };
@@ -49,8 +67,9 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
         if (tableHeader.length) tableExist = tableHeader;
         else tableExist = tr.querySelectorAll("td");
         const rowData: any[] = [];
-        let aTag: HTMLAnchorElement | undefined;
-        tableExist.forEach((td) => {
+        let aTags: any[][] = [];
+ 
+        tableExist.forEach((td, index) => {
           const a = td.querySelector("a");
 
           if (td.dataset.sortValue) {
@@ -65,16 +84,14 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
             return;
           }
           if (a) {
-            a.href = a.href;
-            a.target = "_blank";
-            aTag = a;
+            aTags.push([a.href,index]);
           }
-
-          rowData.push(td.innerText);
+          
+          rowData.push(td.innerText.replaceAll("\n","") && td.innerText.replaceAll(",",""));
         });
 
         if (rowData.length == 0) return;
-        rowData.push(aTag?.href);
+        rowData.push(aTags);
         tableDataArr.push(rowData);
       });
       data.push(tableDataArr);
@@ -83,11 +100,14 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     return data;
   });
 
-  // const data = JSON.parse(await fs.readFile("./data.json", "utf-8")) as any[][];
-  // await fs.writeFile("./data.json", data, "utf-8");
+  const res = await axios.post("http://localhost:3000/api/googledrive", {
+    query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
+  });
+
+  console.log(res.data);
 
   return {
-    props: { data},
+    props: { data, countries: res.data },
   };
 };
 

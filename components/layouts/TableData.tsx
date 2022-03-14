@@ -1,10 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import TableRow from "#/components/common/TableRow";
-import axios from "axios";
+import TableDropDown from "../common/TableDropDrown";
+import Link from "next/link";
+
+import axios, { AxiosResponse } from "axios";
 
 interface Props {
   data: any[][];
   id: String;
+  countries: string[];
 }
 
 interface IUndoObj {
@@ -16,36 +20,38 @@ interface IUndoObj {
 // [[1,2,4],[a,b,d],[q,w,r]]
 // the inner arrays are the rows
 
-const TableData: React.FC<Props> = ({ data, id }) => {
+const TableData: React.FC<Props> = ({ data, id, countries }) => {
   const [stateData, setStateDate] = useState(data);
   const [undoData, setUndoData] = useState<Array<IUndoObj>>([]);
 
   const [inputData, setInput] = useState("");
   const [replaceData, setReplaceInput] = useState("");
-  const sheetRef = useRef<HTMLInputElement>(null);
+  const [dropDownValuesData, setDropDownData] = useState<Array<any>>([]);
 
+  const sheetRef = useRef<HTMLInputElement>(null);
   const [numReplace, setNumReplace] = useState<Array<Number[]>>([]);
 
   const currentDraggedItem = useRef("");
   const currentFilter = useRef("");
   const numsRef = useRef<Array<Number[]>>([]);
+  const selectedFolder = useRef<string>("1Xb4zAkP6ytMvqVPFTFVxfdgM5bKeVGB0");
 
   const currentStyle = useRef("");
-
-
- 
 
   const handleRowDelete = (id: number) => {
     setStateDate((prev) => prev.filter((_, index) => index != id));
     setUndoData([...undoData, { index: id, data: stateData[id], type: "row" }]);
   };
 
-
   const handleColDelete = (id: number) => {
     const delCol: any[] = [];
 
     const newArr = stateData.map((row) => {
-      delCol.push(row.splice(id, 1)[0]);
+      if (row[id] === undefined) {
+        delCol.push("");
+      } else {
+        delCol.push(row.splice(id, 1)[0]);
+      }
       return row;
     });
 
@@ -83,7 +89,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
     if (undoEl.type == "row") stateData.splice(undoEl.index, 0, undoEl.data);
 
     if (undoEl.type == "replace") {
-      let filter = undoEl?.data[2]; 
+      let filter = undoEl?.data[2];
 
       for (let a = 0; a <= filter.length; a++) {
         if (number.test(filter)) {
@@ -91,24 +97,22 @@ const TableData: React.FC<Props> = ({ data, id }) => {
         }
       }
 
-        stateData.forEach((row) => {
-          row.map((element, index) => {
-            row[index] = String(row[index]).replace(
-              undoEl.data[1],
-              undoEl.data[0]
-            );
-          });
+      stateData.forEach((row) => {
+        row.map((element, index) => {
+          row[index] = String(row[index]).replace(
+            undoEl.data[1],
+            undoEl.data[0]
+          );
         });
-      
+      });
     }
 
-    if(undoEl.type == "replace_num"){
-      undoEl.data[1].forEach((element1:number[]) => {
-        stateData[element1[0]][element1[1]] = String(stateData[element1[0]][element1[1]]).replace(
-          undoEl.data[2],
-          undoEl.data[0]
-        )
-      })
+    if (undoEl.type == "replace_num") {
+      undoEl.data[1].forEach((element1: number[]) => {
+        stateData[element1[0]][element1[1]] = String(
+          stateData[element1[0]][element1[1]]
+        ).replace(undoEl.data[2], undoEl.data[0]);
+      });
 
       console.log(undoEl.data[1]);
     }
@@ -145,93 +149,101 @@ const TableData: React.FC<Props> = ({ data, id }) => {
   //   if(operator.)
   // }
 
-
-
   const replace = (searchWord: string, replaceWord: string, filter: string) => {
-    let undoReplaceItem:unknown[] = [];
-    let indicies:any[][] = [];
+    let undoReplaceItem: unknown[] = [];
+    let indicies: any[][] = [];
     let number = "";
-  
 
-        if(filter.length === 0){
-          stateData.forEach((row) => {
-            row.forEach((element,index) => {
-              if(String(element).match(searchWord)){
-                row[index] = row[index].replace(searchWord,replaceWord);
-              }
-            })
-          })
-          undoReplaceItem = [searchWord, replaceWord, filter];
-          setUndoData([
-            ...undoData,
-            { index: 0, data: undoReplaceItem, type: "replace" },
-          ]);
-        }
-        else{
-          stateData.forEach((row ,rowIndex) => {
-            row.forEach((element,colIndex) => {
-              if (filter[0] === ">" || ( filter[0] === ">" && filter[1] === "=")){
-                if (
-                  String(element).match(searchWord) &&
-                  (numsRef.current[rowIndex][colIndex] >= Number(filter.substring(2))) &&
-                  filter[0] === ">" &&
-                  filter[1] === "="
-                ) {
-                  stateData[rowIndex][colIndex] = stateData[rowIndex][colIndex].replace(searchWord, replaceWord);
-                  console.log(rowIndex,colIndex);
-                  indicies.push([rowIndex,colIndex]);
-                
-                } else if (
-                  String(element).match(searchWord) &&
-                  (numsRef.current[rowIndex][colIndex] > Number(filter.substring(2))) &&
-                  filter[0] === ">"
-                ) {
-                  stateData[rowIndex][colIndex] = String(stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
-                  indicies.push([rowIndex,colIndex]);
-                }
-              } else if (filter[0] === "<" || filter[0] === "<=") {
-                if (
-                  String(element).match(searchWord) &&
-                  (numsRef.current[rowIndex][colIndex] <= Number(filter.substring(2))) &&
-                  filter[0] === "<" &&
-                  filter[1] === "="
-                ) {
-                  stateData[rowIndex][colIndex] = String(stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
-                  indicies.push([rowIndex,colIndex]);
-                } else if (
-                  String(element).match(searchWord) &&
-                  (numsRef.current[rowIndex][colIndex] < Number(filter.substring(2))) &&
-                  filter[0] === "<"
-                ) {
-                  stateData[rowIndex][colIndex] = String(  stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
-                  indicies.push([rowIndex,colIndex]);
-                }
-              } else if (filter[0] === "=") {
-                if (String(element).match(searchWord) &&
-                (numsRef.current[rowIndex][colIndex] === Number(filter.substring(1)))) {
-                  stateData[rowIndex][colIndex] = String( stateData[rowIndex][colIndex]).replace(searchWord, replaceWord);
-                  indicies.push([rowIndex,colIndex]);
-                } 
-                
-              
-              }
-            })
-          })
+    if (filter.length === 0) {
+      stateData.forEach((row) => {
+        row.forEach((element, index) => {
+          if (String(element).match(searchWord)) {
+            row[index] = row[index].replace(searchWord, replaceWord);
+          }
+        });
+      });
+      undoReplaceItem = [searchWord, replaceWord, filter];
+      setUndoData([
+        ...undoData,
+        { index: 0, data: undoReplaceItem, type: "replace" },
+      ]);
+    } else {
+      stateData.forEach((row, rowIndex) => {
+        row.forEach((element, colIndex) => {
+          if (filter[0] === ">" || (filter[0] === ">" && filter[1] === "=")) {
+            if (
+              String(element).match(searchWord) &&
+              numsRef.current[rowIndex][colIndex] >=
+                Number(filter.substring(2)) &&
+              filter[0] === ">" &&
+              filter[1] === "="
+            ) {
+              stateData[rowIndex][colIndex] = stateData[rowIndex][
+                colIndex
+              ].replace(searchWord, replaceWord);
+              console.log(rowIndex, colIndex);
+              indicies.push([rowIndex, colIndex]);
+            } else if (
+              String(element).match(searchWord) &&
+              numsRef.current[rowIndex][colIndex] >
+                Number(filter.substring(2)) &&
+              filter[0] === ">"
+            ) {
+              stateData[rowIndex][colIndex] = String(
+                stateData[rowIndex][colIndex]
+              ).replace(searchWord, replaceWord);
+              indicies.push([rowIndex, colIndex]);
+            }
+          } else if (filter[0] === "<" || filter[0] === "<=") {
+            if (
+              String(element).match(searchWord) &&
+              numsRef.current[rowIndex][colIndex] <=
+                Number(filter.substring(2)) &&
+              filter[0] === "<" &&
+              filter[1] === "="
+            ) {
+              stateData[rowIndex][colIndex] = String(
+                stateData[rowIndex][colIndex]
+              ).replace(searchWord, replaceWord);
+              indicies.push([rowIndex, colIndex]);
+            } else if (
+              String(element).match(searchWord) &&
+              numsRef.current[rowIndex][colIndex] <
+                Number(filter.substring(2)) &&
+              filter[0] === "<"
+            ) {
+              stateData[rowIndex][colIndex] = String(
+                stateData[rowIndex][colIndex]
+              ).replace(searchWord, replaceWord);
+              indicies.push([rowIndex, colIndex]);
+            }
+          } else if (filter[0] === "=") {
+            if (
+              String(element).match(searchWord) &&
+              numsRef.current[rowIndex][colIndex] ===
+                Number(filter.substring(1))
+            ) {
+              stateData[rowIndex][colIndex] = String(
+                stateData[rowIndex][colIndex]
+              ).replace(searchWord, replaceWord);
+              indicies.push([rowIndex, colIndex]);
+            }
+          }
+        });
+      });
 
-          undoReplaceItem = [searchWord,indicies,replaceWord,filter];
-          setUndoData([
-            ...undoData,
-            { index: 0, data: undoReplaceItem, type: "replace_num" },
-          ]);
-        }
-        indicies = []
+      undoReplaceItem = [searchWord, indicies, replaceWord, filter];
+      setUndoData([
+        ...undoData,
+        { index: 0, data: undoReplaceItem, type: "replace_num" },
+      ]);
+    }
+    indicies = [];
 
     setStateDate([...stateData]);
- 
 
     console.log(undoData);
     console.log(indicies);
-
   };
 
   /*
@@ -254,7 +266,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
     //Where I obtain the dragged item
     e.dataTransfer?.setData("id", String(index));
     currentDraggedItem.current = "row";
-    
+
     var object = document.getElementById(`#${id}`);
 
     object?.style.backgroundColor.replace("", "green");
@@ -315,36 +327,44 @@ const TableData: React.FC<Props> = ({ data, id }) => {
       }
       setStateDate([...stateData]);
     }
-
-   
   };
 
+  /*
+    Objective: Add newly created google sheet into a specific folder
+      Step 1: Collect the id of the chosen folder and collect the meta file data of the created google sheets file
+        (How do we do that?): We can pull this data from the post we made to the server. With both google drive api and google sheets api
+  */
+
+  const addSheetIntoDriveFolder = () => {};
+
   useEffect(() => {
-    let traceNumbers:number[][] = [];
-    let nums:number[] = [];
+    let traceNumbers: number[][] = [];
+    let nums: number[] = [];
     let number = "";
 
     // const regex = new RegExp(`(\W+)/g`);
 
     console.log("Inputting Numbers");
     stateData.forEach((row) => {
-      row.map((_,index) => {
-        number = row[index].replace(/[^0-9.A-Za-z//]/g,"");
-        nums.push(Number(number))
-      })
+      row.map((element, index) => {
+
+        if(index == row.length - 1){
+          return;
+        }
+        
+        if (element !== null) {
+          number = row[index].replace(/[^0-9.A-Za-z//]/g, "");
+          nums.push(Number(number));
+        }
+      });
       traceNumbers.push(nums);
-      nums = []
+      nums = [];
     });
 
-    
     numsRef.current = traceNumbers;
 
-  
-    return () => {
-      // console.log("Clean Up");
-     
-    };
-  },[stateData])
+    return () => {};
+  }, [stateData]);
 
 
   return (
@@ -371,8 +391,45 @@ const TableData: React.FC<Props> = ({ data, id }) => {
           onClick={() => replace(inputData, replaceData, currentFilter.current)}
         >
           replace
-
         </button>
+
+        <button
+          onClick={async () => {
+            // const res = await axios.post("/api/spreadsheet", {
+            //   data: stateData,
+            //   sheetName: sheetRef.current?.value || "trash"
+            // });
+
+
+            const resGET = await axios.post("/api/test", {
+              folderId: selectedFolder.current,
+              sheetName: sheetRef.current?.value || "trash",
+              data:stateData
+            });
+          
+
+            console.log(stateData)
+
+          }}
+        >
+          Add table
+        </button>
+        <input type="text" className="border-2 border-black" ref={sheetRef} />
+
+        <select
+          id="selectBox"
+          onChange={(e:any) => {
+
+            const selectFolder = document.getElementById(`${e.target.value}`);
+            selectedFolder.current = String(selectFolder?.getAttribute("data-id"))
+            console.log(selectedFolder.current)}}
+        >
+          {countries.map((element: any, index: any) => (
+            <option id={element.name} className="cursor-pointer"data-id={element.id} key={element.id}>
+              {element.name}
+            </option>
+          ))}
+        </select>
       </div>
       <table className="my-10">
         <tbody>
@@ -409,12 +466,14 @@ const TableData: React.FC<Props> = ({ data, id }) => {
               key={index}
               setStyle={currentStyle.current}
             >
-              {tr.map((td, index) => (
+              {tr.map((element, index) => (
                 <td
-                  dangerouslySetInnerHTML={{ __html: td }}
+                  // dangerouslySetInnerHTML={{ __html: element }}
                   className="px-2"
                   key={index}
-                ></td>
+                >
+                  {element}
+                </td>
               ))}
             </TableRow>
           ))}

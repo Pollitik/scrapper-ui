@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import { google } from "googleapis";
+import fs from "fs";
 
 export default async function handler(
   req: NextApiRequest,
@@ -12,7 +13,12 @@ export default async function handler(
     ],
   });
   const sheets = google.sheets({ version: "v4", auth });
-  const spreadsheetId = process.env["SHEET_ID"];
+  const spreadsheetId = "1w7tRoI3AXAokaGRu9PAWk9K9Us10YbCyYOFqWy6SQbQ";
+
+  let csv = "";
+
+  
+
 
   if (req.method == "GET") {
     const data = await sheets.spreadsheets.values.get({
@@ -23,10 +29,17 @@ export default async function handler(
     return res.json(data.data);
   }
 
+
   if (req.method != "POST") res.status(404).send("Invalid route");
 
   const sheetName = req.body.sheetName;
   const data = req.body.data;
+
+  const request = {
+    spreadsheetId:process.env["SHEET_ID"],
+    auth:auth,
+    range:`${sheetName}!A:Z`,
+  }
 
   if (!sheetName || !data) res.status(400).send("missing parameters");
 
@@ -51,5 +64,28 @@ export default async function handler(
 
   let store = await sheets.spreadsheets.values.append(googleSheetsOptions);
 
+  let sheet = await (await sheets.spreadsheets.values.get(request)).data.values;
+
+  let write = await fs.createWriteStream("test.csv");
+
+
+
+
+  sheet?.forEach((array)=> {
+    csv += array.join(",");
+    csv += "\n"
+  })
+
+    await fs.writeFile("test.csv", csv , (err) => {
+      console.log(err);
+    })
+
+    // await write.write(csv);
+
+
+    console.log(csv);
+
   res.status(200).json(store);
+
+  
 }
