@@ -67,8 +67,9 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
         if (tableHeader.length) tableExist = tableHeader;
         else tableExist = tr.querySelectorAll("td");
         const rowData: any[] = [];
-        let aTag: HTMLAnchorElement | undefined;
-        tableExist.forEach((td) => {
+        let aTags: any[][] = [];
+ 
+        tableExist.forEach((td, index) => {
           const a = td.querySelector("a");
 
           if (td.dataset.sortValue) {
@@ -83,17 +84,14 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
             return;
           }
           if (a) {
-            a.href = a.href;
-            a.target = "_blank";
-            
-            aTag = a;
+            aTags.push([a.href,index]);
           }
           
           rowData.push(td.innerText.replaceAll("\n","") && td.innerText.replaceAll(",",""));
         });
 
         if (rowData.length == 0) return;
-        rowData.push(aTag?.href);
+        rowData.push(aTags);
         tableDataArr.push(rowData);
       });
       data.push(tableDataArr);

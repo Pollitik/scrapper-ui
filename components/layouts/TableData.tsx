@@ -337,29 +337,29 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
   const addSheetIntoDriveFolder = () => {};
 
-  useEffect(() => {
-    let traceNumbers: number[][] = [];
-    let nums: number[] = [];
-    let number = "";
+  // useEffect(() => {
+  //   let traceNumbers: number[][] = [];
+  //   let nums: number[] = [];
+  //   let number = "";
 
-    // const regex = new RegExp(`(\W+)/g`);
+  //   // const regex = new RegExp(`(\W+)/g`);
 
-    console.log("Inputting Numbers");
-    stateData.forEach((row) => {
-      row.map((element, index) => {
-        if (element !== null) {
-          number = row[index].replace(/[^0-9.A-Za-z//]/g, "");
-          nums.push(Number(number));
-        }
-      });
-      traceNumbers.push(nums);
-      nums = [];
-    });
+  //   console.log("Inputting Numbers");
+  //   stateData.forEach((row) => {
+  //     row.map((element, index) => {
+  //       if (element !== null) {
+  //         number = row[index].replace(/[^0-9.A-Za-z//]/g, "");
+  //         nums.push(Number(number));
+  //       }
+  //     });
+  //     traceNumbers.push(nums);
+  //     nums = [];
+  //   });
 
-    numsRef.current = traceNumbers;
+  //   numsRef.current = traceNumbers;
 
-    return () => {};
-  }, [stateData]);
+  //   return () => {};
+  // }, [stateData]);
 
 
   return (
@@ -390,19 +390,20 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
         <button
           onClick={async () => {
-            const res = await axios.post("/api/spreadsheet", {
-              data: stateData,
-              sheetName: sheetRef.current?.value || "trash"
-            });
+            // const res = await axios.post("/api/spreadsheet", {
+            //   data: stateData,
+            //   sheetName: sheetRef.current?.value || "trash"
+            // });
 
 
             const resGET = await axios.post("/api/test", {
               folderId: selectedFolder.current,
-              sheetName: sheetRef.current?.value || "trash"
+              sheetName: sheetRef.current?.value || "trash",
+              data:stateData
             });
-            console.log(res)
+          
 
-            console.log(resGET)
+            console.log(stateData)
 
           }}
         >
