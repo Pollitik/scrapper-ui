@@ -337,29 +337,34 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
   const addSheetIntoDriveFolder = () => {};
 
-  // useEffect(() => {
-  //   let traceNumbers: number[][] = [];
-  //   let nums: number[] = [];
-  //   let number = "";
+  useEffect(() => {
+    let traceNumbers: number[][] = [];
+    let nums: number[] = [];
+    let number = "";
 
-  //   // const regex = new RegExp(`(\W+)/g`);
+    // const regex = new RegExp(`(\W+)/g`);
 
-  //   console.log("Inputting Numbers");
-  //   stateData.forEach((row) => {
-  //     row.map((element, index) => {
-  //       if (element !== null) {
-  //         number = row[index].replace(/[^0-9.A-Za-z//]/g, "");
-  //         nums.push(Number(number));
-  //       }
-  //     });
-  //     traceNumbers.push(nums);
-  //     nums = [];
-  //   });
+    console.log("Inputting Numbers");
+    stateData.forEach((row) => {
+      row.map((element, index) => {
 
-  //   numsRef.current = traceNumbers;
+        if(index == row.length - 1){
+          return;
+        }
+        
+        if (element !== null) {
+          number = row[index].replace(/[^0-9.A-Za-z//]/g, "");
+          nums.push(Number(number));
+        }
+      });
+      traceNumbers.push(nums);
+      nums = [];
+    });
 
-  //   return () => {};
-  // }, [stateData]);
+    numsRef.current = traceNumbers;
+
+    return () => {};
+  }, [stateData]);
 
 
   return (
