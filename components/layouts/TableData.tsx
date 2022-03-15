@@ -7,8 +7,8 @@ import axios, { AxiosResponse } from "axios";
 
 interface Props {
   data: any[][];
-  id: String;
-  countries: string[];
+  id?: String;
+  countries?: string[];
 }
 
 interface IUndoObj {
@@ -99,12 +99,11 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
       stateData.forEach((row) => {
         row.map((element, index) => {
-
           if (typeof element != "string") return null;
-          return row[index] = String(row[index]).replace(
+          return (row[index] = String(row[index]).replace(
             undoEl.data[1],
             undoEl.data[0]
-          );
+          ));
         });
       });
     }
@@ -159,7 +158,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     if (filter.length === 0) {
       stateData.forEach((row) => {
         row.forEach((element, index) => {
-          if(typeof element === "string"){
+          if (typeof element === "string") {
             if (String(element).match(searchWord)) {
               row[index] = row[index].replace(searchWord, replaceWord);
             }
@@ -416,7 +415,12 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
         >
           Add table
         </button>
-        <input placeholder="Table Name" type="text" className="border-2 border-black" ref={sheetRef} />
+        <input
+          placeholder="Table Name"
+          type="text"
+          className="border-2 border-black"
+          ref={sheetRef}
+        />
 
         <select
           id="selectBox"
@@ -428,16 +432,17 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
             console.log(selectedFolder.current);
           }}
         >
-          {countries.map((element: any, index: any) => (
-            <option
-              id={element.name}
-              className="cursor-pointer"
-              data-id={element.id}
-              key={element.id}
-            >
-              {element.name}
-            </option>
-          ))}
+          {countries &&
+            countries.map((element: any, index: any) => (
+              <option
+                id={element.name}
+                className="cursor-pointer"
+                data-id={element.id}
+                key={element.id}
+              >
+                {element.name}
+              </option>
+            ))}
         </select>
       </div>
       <table className="my-10">
