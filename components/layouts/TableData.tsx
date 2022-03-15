@@ -347,11 +347,10 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     console.log("Inputting Numbers");
     stateData.forEach((row) => {
       row.map((element, index) => {
-
-        if(index == row.length - 1){
+        if (index == row.length - 1) {
           return;
         }
-        
+
         if (element !== null) {
           number = row[index].replace(/[^0-9.A-Za-z//]/g, "");
           nums.push(Number(number));
@@ -365,7 +364,6 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
     return () => {};
   }, [stateData]);
-
 
   return (
     <div className={"" + id}>
@@ -400,16 +398,13 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
             //   sheetName: sheetRef.current?.value || "trash"
             // });
 
-
             const resGET = await axios.post("/api/test", {
               folderId: selectedFolder.current,
               sheetName: sheetRef.current?.value || "trash",
-              data:stateData
+              data: stateData,
             });
-          
 
-            console.log(stateData)
-
+            console.log(stateData);
           }}
         >
           Add table
@@ -418,14 +413,21 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
         <select
           id="selectBox"
-          onChange={(e:any) => {
-
+          onChange={(e: any) => {
             const selectFolder = document.getElementById(`${e.target.value}`);
-            selectedFolder.current = String(selectFolder?.getAttribute("data-id"))
-            console.log(selectedFolder.current)}}
+            selectedFolder.current = String(
+              selectFolder?.getAttribute("data-id")
+            );
+            console.log(selectedFolder.current);
+          }}
         >
           {countries.map((element: any, index: any) => (
-            <option id={element.name} className="cursor-pointer"data-id={element.id} key={element.id}>
+            <option
+              id={element.name}
+              className="cursor-pointer"
+              data-id={element.id}
+              key={element.id}
+            >
               {element.name}
             </option>
           ))}
@@ -437,21 +439,28 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
           {stateData[0] && (
             <tr>
               <td></td>
-              {stateData[0].map((_, index) => (
-                <td
-                  draggable
-                  onDragStart={(e: React.DragEvent) => onDragColStart(index, e)}
-                  onDrop={(e: React.DragEvent) => onDropped(index, e)}
-                  onDragOver={(e: React.DragEvent) => onDragOver(e)}
-                  onClick={() => {
-                    handleColDelete(index);
-                  }}
-                  className="cursor-pointer column"
-                  key={index}
-                >
-                  - {index}
-                </td>
-              ))}
+              {stateData[0].map((_, index) => {
+                if (index === stateData[0].length - 1) {
+                  return;
+                }
+                return (
+                  <td
+                    draggable
+                    onDragStart={(e: React.DragEvent) =>
+                      onDragColStart(index, e)
+                    }
+                    onDrop={(e: React.DragEvent) => onDropped(index, e)}
+                    onDragOver={(e: React.DragEvent) => onDragOver(e)}
+                    onClick={() => {
+                      handleColDelete(index);
+                    }}
+                    className="cursor-pointer column"
+                    key={index}
+                  >
+                    - {index}
+                  </td>
+                );
+              })}
             </tr>
           )}
 
@@ -466,15 +475,18 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
               key={index}
               setStyle={currentStyle.current}
             >
-              {tr.map((element, index) => (
-                <td
-                  // dangerouslySetInnerHTML={{ __html: element }}
-                  className="px-2"
-                  key={index}
-                >
-                  {element}
-                </td>
-              ))}
+              {tr.map((element, index) => {
+                if (typeof element != "string") return null;
+                return (
+                  <td
+                    // dangerouslySetInnerHTML={{ __html: element }}
+                    className="px-2"
+                    key={index}
+                  >
+                    {element}
+                  </td>
+                );
+              })}
             </TableRow>
           ))}
         </tbody>
