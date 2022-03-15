@@ -159,8 +159,10 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     if (filter.length === 0) {
       stateData.forEach((row) => {
         row.forEach((element, index) => {
-          if (String(element).match(searchWord)) {
-            row[index] = row[index].replace(searchWord, replaceWord);
+          if(typeof element === "string"){
+            if (String(element).match(searchWord)) {
+              row[index] = row[index].replace(searchWord, replaceWord);
+            }
           }
         });
       });
