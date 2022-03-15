@@ -99,7 +99,9 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
       stateData.forEach((row) => {
         row.map((element, index) => {
-          row[index] = String(row[index]).replace(
+
+          if (typeof element != "string") return null;
+          return row[index] = String(row[index]).replace(
             undoEl.data[1],
             undoEl.data[0]
           );
