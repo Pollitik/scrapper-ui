@@ -1,7 +1,7 @@
 import React from "react";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import puppeteer from "puppeteer";
-import TableData from "#/components/layouts/TableData";
+import TableData from "#/components/common/TableData";
 import axios from "axios";
 import Link from "next/link";
 
@@ -11,13 +11,11 @@ const scrape = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <div className="flex flex-col justify-center items-center px-10">
-      {/* <h1 style={{color:"black"}}>
-        <Link href="/"><a>Go Back</a></Link>
-      </h1> */}
-
       <ul>
         <li>
-          <Link href="/"><a style={{color:"black"}}>Go Back</a></Link>
+          <Link href="/">
+            <a style={{ color: "black" }}>Go Back</a>
+          </Link>
         </li>
       </ul>
       {data?.length &&
@@ -68,7 +66,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
         else tableExist = tr.querySelectorAll("td");
         const rowData: any[] = [];
         let aTags: any[][] = [];
- 
+
         tableExist.forEach((td, index) => {
           const a = td.querySelector("a");
 
@@ -84,10 +82,13 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
             return;
           }
           if (a) {
-            aTags.push([a.href,index]);
+            aTags.push([a.href, index]);
           }
-          
-          rowData.push(td.innerText.replaceAll("\n","") && td.innerText.replaceAll(",",""));
+
+          rowData.push(
+            td.innerText.replaceAll("\n", "") &&
+              td.innerText.replaceAll(",", "")
+          );
         });
 
         if (rowData.length == 0) return;

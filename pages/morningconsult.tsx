@@ -1,7 +1,7 @@
 import React from "react";
 import { GetServerSideProps } from "next";
 import puppeteer from "puppeteer";
-import TableData from "#/components/layouts/TableData";
+import TableData from "#/components/common/TableData";
 
 const morningconsult = ({
   googleSheetsInput,

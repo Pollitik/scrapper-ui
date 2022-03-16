@@ -5,19 +5,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  // const dateFilter = new Date('January 01, 2022').toISOString();
+  if (req.method != "POST") return res.status(404).send("Invalid route");
 
-  // axios.create({
-  //   baseURL:'https://www.googleapis.com/drive/v3/files',
-  //   params : {
-  //     q: `createdTime >= '${dateFilter}' or modifiedTime >= '${dateFilter}'`,
-  //     fields: 'files(id,name,modifiedTime,createdTime,mimeType,size)',
-  //     spaces: 'drive',
-  //  },
-  //     headers : {
-  //       authorization: `Bearer ${accessToekn}`
-  //     }
-  // });
   const scopes = ["https://www.googleapis.com/auth/drive", "profile"];
   const creds = process.env["GOOGLE_APPLICATION_CREDENTIALS"];
 
@@ -26,8 +15,6 @@ export default async function handler(
     scopes: scopes,
   });
 
-  if (req.method != "POST") res.status(404).send("Invalid route");
-
   var pageToken: any = null;
 
   const drive = google.drive({ version: "v3", auth });
@@ -35,34 +22,18 @@ export default async function handler(
 
   const query2 = req.body.query;
 
-  async function list() {
-    const response = drive.files
-      .list({
-        q: `${query2} and mimeType = 'application/vnd.google-apps.folder'`,
-        pageSize: 200,
-        fields: "nextPageToken, files(id,name)",
-        spaces: "drive",
-        pageToken: pageToken,
-        orderBy: "name asc"
-      })
-      .then((resApi) => {
-        switch (resApi.status) {
-          case 200:
-            const folders = resApi.data.files;
-            res.status(200).json(folders);
-        }
-      });
-  }
-
-  if (req.method === "POST") {
-    list();
-  }
-
-  // if(req.method === "GET"){
-
-  // }
-
-  if (req.method !== "POST") {
-    res.status(405).send("Only POST reuests allowed");
+  try {
+    const resApi = await drive.files.list({
+      q: `${query2} and mimeType = 'application/vnd.google-apps.folder'`,
+      pageSize: 200,
+      fields: "nextPageToken, files(id,name)",
+      spaces: "drive",
+      pageToken: pageToken,
+      orderBy: "name asc",
+    });
+    const folders = resApi.data.files;
+    res.status(200).json(folders);
+  } catch (err) {
+    return res.status(500).send("Something went wrong");
   }
 }

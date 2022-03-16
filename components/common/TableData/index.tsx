@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import TableRow from "#/components/common/TableRow";
-import TableDropDown from "../common/TableDropDrown";
+import TableDropDown from "../TableDropDrown";
 import Link from "next/link";
 
 import axios, { AxiosResponse } from "axios";
@@ -26,10 +26,8 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
   const [inputData, setInput] = useState("");
   const [replaceData, setReplaceInput] = useState("");
-  const [dropDownValuesData, setDropDownData] = useState<Array<any>>([]);
 
   const sheetRef = useRef<HTMLInputElement>(null);
-  const [numReplace, setNumReplace] = useState<Array<Number[]>>([]);
 
   const currentDraggedItem = useRef("");
   const currentFilter = useRef("");
@@ -399,18 +397,11 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
         <button
           onClick={async () => {
-            // const res = await axios.post("/api/spreadsheet", {
-            //   data: stateData,
-            //   sheetName: sheetRef.current?.value || "trash"
-            // });
-
-            const resGET = await axios.post("/api/test", {
+            await axios.post("/api/spreadsheet", {
               folderId: selectedFolder.current,
               sheetName: sheetRef.current?.value || "trash",
               data: stateData,
             });
-
-            console.log(stateData);
           }}
         >
           Add table

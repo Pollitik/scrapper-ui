@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React from "react";
 
 interface Props {
   handleRowDelete: (id: number) => void;
@@ -17,7 +17,7 @@ const TableRow: React.FC<Props> = ({
   onDragStart,
   onDrop,
   onDragEnd,
-  onDragOver
+  onDragOver,
 }) => {
   return (
     <tr
@@ -27,8 +27,7 @@ const TableRow: React.FC<Props> = ({
       onDragStart={(event: React.DragEvent) => onDragStart(id, event)}
       onDragEnd={() => onDragEnd()}
       className="my-2 cursor-pointer"
-      id={""+id}
-   
+      id={"" + id}
     >
       <i
         className="cursor-pointer"
