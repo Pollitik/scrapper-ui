@@ -1,14 +1,12 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, ReactEventHandler } from "react";
 import TableRow from "#/components/common/TableRow";
-import TableDropDown from "../TableDropDrown";
-import Link from "next/link";
-
 import axios, { AxiosResponse } from "axios";
+
 
 interface Props {
   data: any[][];
-  id?: String;
-  countries?: string[];
+  id: String;
+  countries: string[];
 }
 
 interface IUndoObj {
@@ -17,8 +15,6 @@ interface IUndoObj {
   type: "row" | "col" | "replace" | "replace_num" | "drag-col" | "drag-row";
 }
 
-// [[1,2,4],[a,b,d],[q,w,r]]
-// the inner arrays are the rows
 
 const TableData: React.FC<Props> = ({ data, id, countries }) => {
   const [stateData, setStateDate] = useState(data);
@@ -32,7 +28,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
   const currentDraggedItem = useRef("");
   const currentFilter = useRef("");
   const numsRef = useRef<Array<Number[]>>([]);
-  const selectedFolder = useRef<string>("0B1t8CP92v4NSOUExcVFpNjBlZGs");
+  const selectedFolder = useRef<string>("1Xb4zAkP6ytMvqVPFTFVxfdgM5bKeVGB0");
 
   const currentStyle = useRef("");
 
@@ -87,33 +83,31 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     if (undoEl.type == "row") stateData.splice(undoEl.index, 0, undoEl.data);
 
     if (undoEl.type == "replace") {
-      let filter = undoEl?.data[2];
-
-      for (let a = 0; a <= filter.length; a++) {
-        if (number.test(filter)) {
-          filter = filter.slice(1);
-        }
-      }
-
-      stateData.forEach((row) => {
-        row.map((element, index) => {
-          if (typeof element != "string") return null;
-          return (row[index] = String(row[index]).replace(
-            undoEl.data[1],
-            undoEl.data[0]
-          ));
-        });
-      });
-    }
-
-    if (undoEl.type == "replace_num") {
       undoEl.data[1].forEach((element1: number[]) => {
         stateData[element1[0]][element1[1]] = String(
           stateData[element1[0]][element1[1]]
         ).replace(undoEl.data[2], undoEl.data[0]);
       });
 
-      console.log(undoEl.data[1]);
+      console.log(undoData);
+    }
+
+    if (undoEl.type == "replace_num") {
+      undoEl.data[1].forEach((element1: number[]) => {
+        if (undoEl.data[2] === "") {
+          stateData[element1[0]][element1[1]] =
+            String(stateData[element1[0]][element1[1]]).substring(
+              0,
+              element1[2]
+            ) +
+            undoEl.data[0] +
+            String(stateData[element1[0]][element1[1]]).substring(element1[2]);
+        } else {
+          stateData[element1[0]][element1[1]] = String(
+            stateData[element1[0]][element1[1]]
+          ).replace(undoEl.data[2], undoEl.data[0]);
+        }
+      });
     }
 
     if (undoEl.type == "drag-row") {
@@ -144,26 +138,36 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     Step 2: Find the words through each array and change that word into the replace word 
   */
 
-  // const comparatorOperator = (operator:string) => {
-  //   if(operator.)
-  // }
+
 
   const replace = (searchWord: string, replaceWord: string, filter: string) => {
     let undoReplaceItem: unknown[] = [];
     let indicies: any[][] = [];
-    let number = "";
+
+    const searchWordPattern = new RegExp("[" + searchWord + "]");
+
+    if (
+      (searchWord.length === 0 || replaceWord.length === 0) &&
+      filter.length === 0
+    )
+      return;
+
+    if (searchWord === "space") searchWord = "";
+
+    if (replaceWord === "space") replaceWord = "";
 
     if (filter.length === 0) {
-      stateData.forEach((row) => {
-        row.forEach((element, index) => {
-          if (typeof element === "string") {
-            if (String(element).match(searchWord)) {
-              row[index] = row[index].replace(searchWord, replaceWord);
-            }
+      stateData.forEach((row, rowIndex) => {
+        row.forEach((element, colIndex) => {
+          if (String(element).match(searchWordPattern)) {
+            row[colIndex] = row[colIndex].replace(searchWord, replaceWord);
+            indicies.push([rowIndex, colIndex]);
           }
         });
       });
-      undoReplaceItem = [searchWord, replaceWord, filter];
+
+      console.log(indicies);
+      undoReplaceItem = [searchWord, indicies, replaceWord, filter];
       setUndoData([
         ...undoData,
         { index: 0, data: undoReplaceItem, type: "replace" },
@@ -171,6 +175,8 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     } else {
       stateData.forEach((row, rowIndex) => {
         row.forEach((element, colIndex) => {
+          const searchWordIndex =
+            stateData[rowIndex][colIndex].indexOf(searchWord);
           if (filter[0] === ">" || (filter[0] === ">" && filter[1] === "=")) {
             if (
               String(element).match(searchWord) &&
@@ -182,18 +188,18 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
               stateData[rowIndex][colIndex] = stateData[rowIndex][
                 colIndex
               ].replace(searchWord, replaceWord);
-              console.log(rowIndex, colIndex);
-              indicies.push([rowIndex, colIndex]);
+
+              indicies.push([rowIndex, colIndex, searchWordIndex]);
             } else if (
               String(element).match(searchWord) &&
               numsRef.current[rowIndex][colIndex] >
-                Number(filter.substring(2)) &&
+                Number(filter.substring(1)) &&
               filter[0] === ">"
             ) {
               stateData[rowIndex][colIndex] = String(
                 stateData[rowIndex][colIndex]
               ).replace(searchWord, replaceWord);
-              indicies.push([rowIndex, colIndex]);
+              indicies.push([rowIndex, colIndex, searchWordIndex]);
             }
           } else if (filter[0] === "<" || filter[0] === "<=") {
             if (
@@ -206,17 +212,17 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
               stateData[rowIndex][colIndex] = String(
                 stateData[rowIndex][colIndex]
               ).replace(searchWord, replaceWord);
-              indicies.push([rowIndex, colIndex]);
+              indicies.push([rowIndex, colIndex, searchWordIndex]);
             } else if (
               String(element).match(searchWord) &&
               numsRef.current[rowIndex][colIndex] <
-                Number(filter.substring(2)) &&
+                Number(filter.substring(1)) &&
               filter[0] === "<"
             ) {
               stateData[rowIndex][colIndex] = String(
                 stateData[rowIndex][colIndex]
               ).replace(searchWord, replaceWord);
-              indicies.push([rowIndex, colIndex]);
+              indicies.push([rowIndex, colIndex, searchWordIndex]);
             }
           } else if (filter[0] === "=") {
             if (
@@ -227,7 +233,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
               stateData[rowIndex][colIndex] = String(
                 stateData[rowIndex][colIndex]
               ).replace(searchWord, replaceWord);
-              indicies.push([rowIndex, colIndex]);
+              indicies.push([rowIndex, colIndex, searchWordIndex]);
             }
           }
         });
@@ -238,13 +244,11 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
         ...undoData,
         { index: 0, data: undoReplaceItem, type: "replace_num" },
       ]);
+      console.log(undoData);
     }
     indicies = [];
 
     setStateDate([...stateData]);
-
-    console.log(undoData);
-    console.log(indicies);
   };
 
   /*
@@ -271,16 +275,11 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     var object = document.getElementById(`#${id}`);
 
     object?.style.backgroundColor.replace("", "green");
-
-    console.log(currentDraggedItem.current);
   };
 
   const onDragColStart = (index: number, e: React.DragEvent) => {
-    const target = e.target;
     e.dataTransfer.setData("id", String(index));
-    currentDraggedItem.current = "col";
-
-    console.log(currentDraggedItem.current);
+    currentDraggedItem.current = "column";
   };
 
   const onDragOver = (e: React.DragEvent) => {
@@ -288,46 +287,68 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
   };
 
   const onDragEnd = () => {
-    //This is where we clear the animations
-
     console.log("Drag End");
   };
 
-  const onDropped = (droppedIndex: number, e: React.DragEvent) => {
+  const onDropped = (
+    dropTargetIndex: number,
+    e: React.DragEvent | React.SyntheticEvent
+  ) => {
     //Where we switch the dragged item with the item that was dropped on
     //Add a functionnality to check if the dragged item type(col or row) matches with the dropped item type
     console.log("Dropped");
 
-    var data: number = +e.dataTransfer.getData("id");
-    var droppedIndexItem = stateData[droppedIndex];
+    var dropItemIndex: number = +(e as React.DragEvent).dataTransfer.getData(
+      "id"
+    );
+    var dropTarget = (e as React.SyntheticEvent).currentTarget;
 
-    if (
-      currentDraggedItem.current === "col" ||
-      currentDraggedItem.current === "row"
-    ) {
-      if (currentDraggedItem.current === "col") {
-        var temp: any = "";
+    var dropTargetItem = stateData[dropTargetIndex];
+
+    console.log(currentDraggedItem.current);
+    console.log(dropTarget.classList[0]);
+
+    if (dropTarget.classList[0] == currentDraggedItem.current) {
+      if (
+        currentDraggedItem.current === "column" &&
+        dropTarget.classList[0] === "column"
+      ) {
+        let temp: any = "";
         stateData.forEach((row) => {
-          temp = row[data];
-          row[data] = row[droppedIndex];
-          row[droppedIndex] = temp;
+          temp = row[dropItemIndex] != [] ? row[dropItemIndex] : "";
+          row[dropItemIndex] =
+            row[dropTargetIndex] != [] ? row[dropTargetIndex] : "";
+          row[dropTargetIndex] = temp;
         });
         setUndoData([
           ...undoData,
-          { index: 0, data: [droppedIndex, data], type: "drag-col" },
+          {
+            index: 0,
+            data: [dropTargetIndex, dropItemIndex],
+            type: "drag-col",
+          },
         ]);
       }
 
-      if (currentDraggedItem.current === "row") {
-        stateData[droppedIndex] = stateData[data];
-        stateData[data] = droppedIndexItem;
+      if (
+        currentDraggedItem.current === "row" &&
+        dropTarget.classList[0] === "row"
+      ) {
+        stateData[dropTargetIndex] = stateData[dropItemIndex];
+        stateData[dropItemIndex] = dropTargetItem;
         setUndoData([
           ...undoData,
-          { index: 0, data: [droppedIndex, data], type: "drag-row" },
+          {
+            index: 0,
+            data: [dropTargetIndex, dropItemIndex],
+            type: "drag-row",
+          },
         ]);
       }
-      setStateDate([...stateData]);
-    }
+    } else return;
+
+    console.log(undoData);
+    setStateDate([...stateData]);
   };
 
   /*
@@ -336,14 +357,10 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
         (How do we do that?): We can pull this data from the post we made to the server. With both google drive api and google sheets api
   */
 
-  const addSheetIntoDriveFolder = () => {};
-
   useEffect(() => {
     let traceNumbers: number[][] = [];
     let nums: number[] = [];
     let number = "";
-
-    // const regex = new RegExp(`(\W+)/g`);
 
     console.log("Inputting Numbers");
     stateData.forEach((row) => {
@@ -374,20 +391,17 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
           onChange={(e) => setInput(e.target.value)}
           type="text"
           className="border-2 border-black"
-          placeholder="Search word"
         />
         <input
           onChange={(e) => setReplaceInput(e.target.value)}
           type="text"
           className="border-2 border-black"
-          placeholder="Replace word"
         />
 
         <input
           type="text"
           className="border-2 border-black"
           onChange={(e) => (currentFilter.current = e.target.value)}
-          placeholder="Filter"
         />
         <button
           onClick={() => replace(inputData, replaceData, currentFilter.current)}
@@ -406,12 +420,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
         >
           Add table
         </button>
-        <input
-          placeholder="Table Name"
-          type="text"
-          className="border-2 border-black"
-          ref={sheetRef}
-        />
+        <input type="text" className="border-2 border-black" ref={sheetRef} />
 
         <select
           id="selectBox"
@@ -423,17 +432,16 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
             console.log(selectedFolder.current);
           }}
         >
-          {countries &&
-            countries.map((element: any, index: any) => (
-              <option
-                id={element.name}
-                className="cursor-pointer"
-                data-id={element.id}
-                key={element.id}
-              >
-                {element.name}
-              </option>
-            ))}
+          {countries.map((element: any, index: any) => (
+            <option
+              id={element.name}
+              className="cursor-pointer"
+              data-id={element.id}
+              key={element.id}
+            >
+              {element.name}
+            </option>
+          ))}
         </select>
       </div>
       <table className="my-10">
@@ -442,53 +450,45 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
           {stateData[0] && (
             <tr>
               <td></td>
-              {stateData[0].map((_, index) => {
-                if (index === stateData[0].length - 1) {
-                  return;
-                }
-                return (
-                  <td
-                    draggable
-                    onDragStart={(e: React.DragEvent) =>
-                      onDragColStart(index, e)
-                    }
-                    onDrop={(e: React.DragEvent) => onDropped(index, e)}
-                    onDragOver={(e: React.DragEvent) => onDragOver(e)}
-                    onClick={() => {
-                      handleColDelete(index);
-                    }}
-                    className="cursor-pointer column"
-                    key={index}
-                  >
-                    - {index}
-                  </td>
-                );
-              })}
+              {stateData[0].map((_, index) => (
+                <td
+                  draggable
+                  onDragStart={(e: React.DragEvent) => onDragColStart(index, e)}
+                  onDrop={(e: React.DragEvent) => onDropped(index, e)}
+                  onDragOver={(e: React.DragEvent) => onDragOver(e)}
+                  onClick={() => {
+                    handleColDelete(index);
+                  }}
+                  className="column cursor-pointer"
+                  key={index}
+                >
+                  - {index}
+                </td>
+              ))}
             </tr>
           )}
 
-          {stateData.map((tr, index) => (
+          {stateData.map((tr, row_index) => (
             <TableRow
-              id={index}
+              id={row_index}
               handleRowDelete={handleRowDelete}
               onDragOver={onDragOver}
               onDragStart={onDragRowStart}
               onDrop={onDropped}
               onDragEnd={onDragEnd}
-              key={index}
+              key={row_index}
               setStyle={currentStyle.current}
             >
-              {tr.map((element, index) => {
-                if (typeof element != "string") return null;
-                return (
-                  <td
-                    // dangerouslySetInnerHTML={{ __html: element }}
-                    className="px-2"
-                    key={index}
-                  >
-                    {element}
-                  </td>
-                );
+              {tr.map((element, col_index) => {
+                if (col_index === tr.length - 1 && element.length > 0) {
+                  return <h1>Link</h1>;
+                } else if (tr) {
+                  return (
+                    <td className="px-2" key={col_index}>
+                      {element}
+                    </td>
+                  );
+                }
               })}
             </TableRow>
           ))}
@@ -497,5 +497,6 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     </div>
   );
 };
-
 export default TableData;
+
+

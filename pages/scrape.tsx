@@ -95,6 +95,8 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
         rowData.push(aTags);
         tableDataArr.push(rowData);
       });
+
+      tableDataArr.splice(1,1);
       data.push(tableDataArr);
     });
 
