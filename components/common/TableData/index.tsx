@@ -391,17 +391,19 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
           onChange={(e) => setInput(e.target.value)}
           type="text"
           className="border-2 border-black"
+          placeholder="Search Word"
         />
         <input
           onChange={(e) => setReplaceInput(e.target.value)}
           type="text"
           className="border-2 border-black"
+          placeholder="Replace Word"
         />
-
         <input
           type="text"
           className="border-2 border-black"
           onChange={(e) => (currentFilter.current = e.target.value)}
+          placeholder="Filter"
         />
         <button
           onClick={() => replace(inputData, replaceData, currentFilter.current)}
@@ -420,7 +422,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
         >
           Add table
         </button>
-        <input type="text" className="border-2 border-black" ref={sheetRef} />
+        <input type="text" placeholder="File Name" className="border-2 border-black" ref={sheetRef} />
 
         <select
           id="selectBox"
