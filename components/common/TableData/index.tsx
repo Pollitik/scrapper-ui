@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, ReactEventHandler } from "react";
 import TableRow from "#/components/common/TableRow";
-import axios, { AxiosResponse } from "axios";
+import axios from "axios";
 
 
 interface Props {
@@ -287,7 +287,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
   };
 
   const onDragEnd = () => {
-    console.log("Drag End");
+   
   };
 
   const onDropped = (
@@ -296,7 +296,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
   ) => {
     //Where we switch the dragged item with the item that was dropped on
     //Add a functionnality to check if the dragged item type(col or row) matches with the dropped item type
-    console.log("Dropped");
+
 
     var dropItemIndex: number = +(e as React.DragEvent).dataTransfer.getData(
       "id"
@@ -305,8 +305,6 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
     var dropTargetItem = stateData[dropTargetIndex];
 
-    console.log(currentDraggedItem.current);
-    console.log(dropTarget.classList[0]);
 
     if (dropTarget.classList[0] == currentDraggedItem.current) {
       if (
@@ -347,7 +345,6 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
       }
     } else return;
 
-    console.log(undoData);
     setStateDate([...stateData]);
   };
 
@@ -482,7 +479,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
               setStyle={currentStyle.current}
             >
               {tr.map((element, col_index) => {
-                if (col_index === tr.length - 1 && element.length > 0) {
+                if (col_index === tr.length - 1 && typeof element === "object") {
                   return <h1>Link</h1>;
                 } else if (tr) {
                   return (

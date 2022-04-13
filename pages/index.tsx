@@ -10,7 +10,14 @@ const Home: NextPage = () => {
     e.preventDefault();
 
     const formData = new FormData(e.target as HTMLFormElement);
-    router.push("/scrape?url=" + formData.get("url"));
+
+    if(formData.get("url") != "https://morningconsult.com/global-leader-approval/"){
+      router.push("/scrape?url=" + formData.get("url"));
+    }
+    else{
+      router.push("/morningconsult?url=" + formData.get("url"));
+    }
+   
   };
   return (
     <div className="min-h-screen flex justify-center items-center">
