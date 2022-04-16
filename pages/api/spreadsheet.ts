@@ -30,12 +30,16 @@ export default async function handler(
   const { data } = req.body;
 
   data.forEach((row: any[]) => {
-    const aTags = row[row.length - 1];
-    aTags.forEach((linkMeta: any) => {
-      row[linkMeta[1]] = `=HYPERLINK("${linkMeta[0]}", "${row[linkMeta[1]]}")`;
-    });
+      const aTags = row[row.length - 1];
 
-    row.pop();
+      if(typeof aTags === "object"){
+      aTags.forEach((linkMeta: any) => {
+        row[linkMeta[1]] = `=HYPERLINK("${linkMeta[0]}", "${row[linkMeta[1]]}")`;
+      });
+
+      row.pop();
+    }
+
   });
 
   const choosenFolder = req.body.folderId;
