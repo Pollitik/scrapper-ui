@@ -28,7 +28,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
   const currentDraggedItem = useRef("");
   const currentFilter = useRef("");
   const numsRef = useRef<Array<Number[]>>([]);
-  const selectedFolder = useRef<string>("1Xb4zAkP6ytMvqVPFTFVxfdgM5bKeVGB0");
+  const selectedFolder = useRef<string>("0B1t8CP92v4NSOUExcVFpNjBlZGs");
 
   const currentStyle = useRef("");
 
@@ -346,6 +346,8 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     } else return;
 
     setStateDate([...stateData]);
+
+    console.log(stateData)
   };
 
   /*
