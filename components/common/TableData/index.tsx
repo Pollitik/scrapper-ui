@@ -7,6 +7,7 @@ interface Props {
   data: any[][];
   id: String;
   countries: string[];
+  
 }
 
 interface IUndoObj {
@@ -482,7 +483,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
             >
               {tr.map((element, col_index) => {
                 if (col_index === tr.length - 1 && typeof element === "object") {
-                  return <h1>Link</h1>;
+                  return <td key={col_index}>Link</td>;
                 } else if (tr) {
                   return (
                     <td className="px-2" key={col_index}>

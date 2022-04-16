@@ -92,7 +92,9 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
         });
 
         if (rowData.length == 0) return;
-        rowData.push(aTags);
+
+        if(aTags.length > 0) rowData.push(aTags);
+        
         tableDataArr.push(rowData);
       });
 

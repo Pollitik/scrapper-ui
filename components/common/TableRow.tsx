@@ -29,14 +29,14 @@ const TableRow: React.FC<Props> = ({
       className="row my-2 cursor-pointer"
       id={"" + id}
     >
-      <i
+      <td
         className="cursor-pointer"
         onClick={() => {
           handleRowDelete(id);
         }}
       >
         -
-      </i>
+      </td>
       {children}
     </tr>
   );
