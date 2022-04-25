@@ -105,13 +105,13 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     return data;
   });
 
-  // const res = await axios.post("http://localhost:3000/api/googledrive", {
-  //   query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
-  // });
+  const res = await axios.post("http://localhost:3000/api/googledrive", {
+    query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
+  });
 
 
   return {
-    props: { data, countries: [] },
+    props: { data, countries: res.data },
   };
 };
 
