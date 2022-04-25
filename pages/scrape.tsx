@@ -11,7 +11,7 @@ const scrape = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <div className="flex flex-col justify-center items-center px-10">
-      {/* <ul>
+      <ul>
         <li>
           <Link href="/">
             <a style={{ color: "black" }}>Go Back</a>
@@ -26,8 +26,7 @@ const scrape = ({
             data={table}
             id={String(index)}
           />
-        ))} */}
-        <h1>{data}</h1>
+        ))}
     </div>
   );
 };
