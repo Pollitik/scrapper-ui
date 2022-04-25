@@ -20,7 +20,7 @@ const morningconsult = ({
         </li>
       </ul>
       {data.map((table:any, index:any) => (
-        <TableData key={index} id={String(index)} data={table} countries={countries} />
+        <TableData key={index} id={String(index)} data={table} />
       ))}
     </div>
   );
