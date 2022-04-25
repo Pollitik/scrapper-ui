@@ -43,6 +43,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
   const browser = await puppeteer.launch({
     headless: true,
+    defaultViewport:null,
     args: ["--no-sandbox","--incognito", "--single-process", "--no-zygote"],
   });
   const page = await browser.newPage();
