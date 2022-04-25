@@ -43,7 +43,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox"],
+    args: ["--no-sandbox","--incognito", "--single-process", "--no-zygote"],
   });
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: "domcontentloaded" });
@@ -105,14 +105,13 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     return data;
   });
 
-  const res = await axios.post("http://localhost:3000/api/googledrive", {
-    query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
-  });
+  // const res = await axios.post("http://localhost:3000/api/googledrive", {
+  //   query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
+  // });
 
-  console.log(res.data);
 
   return {
-    props: { data, countries: res.data },
+    props: { data, countries: [] },
   };
 };
 
