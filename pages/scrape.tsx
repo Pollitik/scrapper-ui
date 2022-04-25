@@ -11,7 +11,7 @@ const scrape = ({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <div className="flex flex-col justify-center items-center px-10">
-      <ul>
+      {/* <ul>
         <li>
           <Link href="/">
             <a style={{ color: "black" }}>Go Back</a>
@@ -26,7 +26,8 @@ const scrape = ({
             data={table}
             id={String(index)}
           />
-        ))}
+        ))} */}
+        <h1>hi</h1>
     </div>
   );
 };
@@ -41,78 +42,80 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       props: {},
     };
 
-  const browser = await puppeteer.launch({
-    headless: true,
-    defaultViewport:null,
-    args: ["--no-sandbox","--incognito", "--single-process", "--no-zygote"],
-  });
-  const page = await browser.newPage();
-  await page.goto(url, { waitUntil: "domcontentloaded" });
 
-  const data = await page.evaluate(() => {
-    const isDate = (date: string) => {
-      return !isNaN(Date.parse(date));
-    };
+    const data:any[] = [];
+  // const browser = await puppeteer.launch({
+  //   headless: true,
+  //   defaultViewport:null,
+  //   args: ["--no-sandbox","--incognito", "--single-process", "--no-zygote","--disable-setuid-sandbox"],
+  // });
+  // const page = await browser.newPage();
+  // await page.goto(url, { waitUntil: "domcontentloaded" });
 
-    const tables = document.querySelectorAll("table");
-    const data: any[] = [];
+  // const data = await page.evaluate(() => {
+  //   const isDate = (date: string) => {
+  //     return !isNaN(Date.parse(date));
+  //   };
 
-    tables.forEach((table) => {
-      const tableRows = table.querySelectorAll("tr");
-      const tableDataArr: any[] = [];
-      tableRows.forEach((tr) => {
-        const tableHeader = tr.querySelectorAll("th");
-        let tableExist;
-        if (tableHeader.length) tableExist = tableHeader;
-        else tableExist = tr.querySelectorAll("td");
-        const rowData: any[] = [];
-        let aTags: any[][] = [];
+  //   const tables = document.querySelectorAll("table");
+  //   const data: any[] = [];
 
-        tableExist.forEach((td, index) => {
-          const a = td.querySelector("a");
+  //   tables.forEach((table) => {
+  //     const tableRows = table.querySelectorAll("tr");
+  //     const tableDataArr: any[] = [];
+  //     tableRows.forEach((tr) => {
+  //       const tableHeader = tr.querySelectorAll("th");
+  //       let tableExist;
+  //       if (tableHeader.length) tableExist = tableHeader;
+  //       else tableExist = tr.querySelectorAll("td");
+  //       const rowData: any[] = [];
+  //       let aTags: any[][] = [];
 
-          if (td.dataset.sortValue) {
-            const date = isDate(td.dataset.sortValue);
+  //       tableExist.forEach((td, index) => {
+  //         const a = td.querySelector("a");
 
-            if (date) {
-              const dateObj = new Date(td.dataset.sortValue as string);
+  //         if (td.dataset.sortValue) {
+  //           const date = isDate(td.dataset.sortValue);
 
-              rowData.push(dateObj.toLocaleDateString("en-us"));
-            } else rowData.push(td.dataset.sortValue);
+  //           if (date) {
+  //             const dateObj = new Date(td.dataset.sortValue as string);
 
-            return;
-          }
-          if (a) {
-            aTags.push([a.href, index]);
-          }
+  //             rowData.push(dateObj.toLocaleDateString("en-us"));
+  //           } else rowData.push(td.dataset.sortValue);
 
-          rowData.push(
-            td.innerText.replaceAll("\n", "") &&
-              td.innerText.replaceAll(",", "")
-          );
-        });
+  //           return;
+  //         }
+  //         if (a) {
+  //           aTags.push([a.href, index]);
+  //         }
 
-        if (rowData.length == 0) return;
+  //         rowData.push(
+  //           td.innerText.replaceAll("\n", "") &&
+  //             td.innerText.replaceAll(",", "")
+  //         );
+  //       });
 
-        if(aTags.length > 0) rowData.push(aTags);
+  //       if (rowData.length == 0) return;
+
+  //       if(aTags.length > 0) rowData.push(aTags);
         
-        tableDataArr.push(rowData);
-      });
+  //       tableDataArr.push(rowData);
+  //     });
 
-      tableDataArr.splice(1,1);
-      data.push(tableDataArr);
-    });
+  //     tableDataArr.splice(1,1);
+  //     data.push(tableDataArr);
+  //   });
 
-    return data;
-  });
+  //   return data;
+  // });
 
-  const res = await axios.post("http://localhost:3000/api/googledrive", {
-    query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
-  });
+  // const res = await axios.post("http://localhost:3000/api/googledrive", {
+  //   query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
+  // });
 
 
   return {
-    props: { data, countries: res.data },
+    props: { data, countries: ["hi"] },
   };
 };
 
