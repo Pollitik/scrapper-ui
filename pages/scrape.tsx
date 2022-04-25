@@ -7,6 +7,7 @@ import Link from "next/link";
 
 const scrape = ({
   data,
+  countries
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <div className="flex flex-col justify-center items-center px-10">
@@ -20,7 +21,7 @@ const scrape = ({
       {data?.length &&
         data.map((table, index) => (
           <TableData
-            
+            countries={countries}
             key={index}
             data={table}
             id={String(index)}
@@ -109,13 +110,13 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     return data;
   });
 
-  // const res = await axios.post("http://localhost:3000/api/googledrive", {
-  //   query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
-  // });
+  const res = await axios.post("/api/googledrive", {
+    query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
+  });
 
 
   return {
-    props: { data},
+    props: { data, countries:res.data},
   };
 };
 

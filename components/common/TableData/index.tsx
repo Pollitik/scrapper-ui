@@ -6,7 +6,7 @@ import axios from "axios";
 interface Props {
   data: any[][];
   id: String;
-  // countries: string[];
+  countries: string[];
   
 }
 
@@ -17,7 +17,7 @@ interface IUndoObj {
 }
 
 
-const TableData: React.FC<Props> = ({ data, id }) => {
+const TableData: React.FC<Props> = ({ data, id, countries }) => {
   const [stateData, setStateDate] = useState(data);
   const [undoData, setUndoData] = useState<Array<IUndoObj>>([]);
 
@@ -424,7 +424,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
         </button>
         <input type="text" placeholder="File Name" className="border-2 border-black" ref={sheetRef} />
 
-        {/* <select
+        <select
           id="selectBox"
           onChange={(e: any) => {
             const selectFolder = document.getElementById(`${e.target.value}`);
@@ -444,7 +444,7 @@ const TableData: React.FC<Props> = ({ data, id }) => {
               {element.name}
             </option>
           ))}
-        </select> */}
+        </select>
       </div>
       <table className="my-10">
         <tbody>
