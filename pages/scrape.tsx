@@ -21,12 +21,13 @@ const scrape = ({
       {/* {data?.length &&
         data.map((table, index) => (
           <TableData
-            countries={countries}
+            
             key={index}
             data={table}
             id={String(index)}
           />
         ))} */}
+        {data}
     </div>
   );
 };
