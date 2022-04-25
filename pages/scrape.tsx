@@ -7,7 +7,6 @@ import Link from "next/link";
 
 const scrape = ({
   data,
-  countries,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <div className="flex flex-col justify-center items-center px-10">
@@ -18,7 +17,7 @@ const scrape = ({
           </Link>
         </li>
       </ul>
-      {/* {data?.length &&
+      {data?.length &&
         data.map((table, index) => (
           <TableData
             
@@ -26,8 +25,8 @@ const scrape = ({
             data={table}
             id={String(index)}
           />
-        ))} */}
-        {data}
+        ))}
+        {/* {data} */}
     </div>
   );
 };
@@ -116,7 +115,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
 
   return {
-    props: { data, countries: ["hi"] },
+    props: { data},
   };
 };
 
