@@ -27,7 +27,7 @@ const scrape = ({
             id={String(index)}
           />
         ))} */}
-        <h1>hi</h1>
+        <h1>{data}</h1>
     </div>
   );
 };
@@ -43,15 +43,16 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     };
 
 
-    const data:any[] = [];
-  // const browser = await puppeteer.launch({
-  //   headless: true,
-  //   defaultViewport:null,
-  //   args: ["--no-sandbox","--incognito", "--single-process", "--no-zygote","--disable-setuid-sandbox"],
-  // });
-  // const page = await browser.newPage();
-  // await page.goto(url, { waitUntil: "domcontentloaded" });
+  let data = "";
+  const browser = await puppeteer.launch({
+    headless: true,
+    defaultViewport:null,
+    args: ["--no-sandbox","--incognito", "--single-process", "--no-zygote","--disable-setuid-sandbox"],
+  });
+  const page = await browser.newPage();
+  await page.goto(url, { waitUntil: "domcontentloaded" });
 
+  data = await page.title();
   // const data = await page.evaluate(() => {
   //   const isDate = (date: string) => {
   //     return !isNaN(Date.parse(date));
