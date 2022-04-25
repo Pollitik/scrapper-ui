@@ -1,6 +1,6 @@
 import React from "react";
 import { GetServerSideProps,InferGetServerSidePropsType } from "next";
-import puppeteer from "puppeteer";
+import puppeteer from "puppeteer-core";
 import TableData from "#/components/common/TableData";
 import axios from "axios";
 import Link from "next/link";
