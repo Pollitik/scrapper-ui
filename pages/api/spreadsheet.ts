@@ -1,91 +1,81 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { google } from "googleapis";
 import fs from "fs";
+import type { NextApiRequest, NextApiResponse } from "next";
 
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const auth = new google.auth.GoogleAuth({
+  if (req.method !== "POST") return res.status(404).send("route doesn't exist");
+
+  const scopes = ["https://www.googleapis.com/auth/drive.file", "profile"];
+
+  const creds = process.env["GOOGLE_APPLICATION_CREDENTIALS"];
+
+  const authDrive = new google.auth.GoogleAuth({
+    keyFile: creds,
+    scopes: scopes,
+  });
+
+  const authSheets = new google.auth.GoogleAuth({
     scopes: [
       "https://www.googleapis.com/auth/spreadsheets.readonly",
       "https://www.googleapis.com/auth/spreadsheets",
     ],
   });
-  const sheets = google.sheets({ version: "v4", auth });
-  const spreadsheetId = "1w7tRoI3AXAokaGRu9PAWk9K9Us10YbCyYOFqWy6SQbQ";
 
-  let csv = "";
+  const drive = google.drive({ version: "v3", auth: authDrive });
+  const sheets = google.sheets({ version: "v4", auth: authSheets });
 
+  const { data } = req.body;
+
+  data.forEach((row: any[]) => {
+      const aTags = row[row.length - 1];
   
 
+      if(typeof aTags === "object"){
+        aTags.forEach((linkMeta: any) => {
+        row[linkMeta[1]] = `=HYPERLINK("${linkMeta[0]}", "${row[linkMeta[1]]}")`;
 
-  if (req.method == "GET") {
-    const data = await sheets.spreadsheets.values.get({
-      spreadsheetId,
-      range: "Sheet1!A1:D1",
-    });
+      });
+    }
 
-    return res.json(data.data);
-  }
+    row.pop();
 
+  });
 
-  if (req.method != "POST") res.status(404).send("Invalid route");
+  console.log(data);
 
+  const choosenFolder = req.body.folderId;
   const sheetName = req.body.sheetName;
-  const data = req.body.data;
-
-  const request = {
-    spreadsheetId:process.env["SHEET_ID"],
-    auth:auth,
-    range:`${sheetName}!A:Z`,
-  }
-
-  if (!sheetName || !data) res.status(400).send("missing parameters");
 
   try {
-    await sheets.spreadsheets.batchUpdate({
-      spreadsheetId,
+    let newSheet = await sheets.spreadsheets.create({
       requestBody: {
-        requests: [{ addSheet: { properties: { title: sheetName } } }],
+        properties: {
+          title: sheetName,
+        },
       },
     });
-  } catch (e) {
-    console.log(e);
+
+    const googleSheetsOptions = {
+      auth: authSheets,
+      spreadsheetId: String(newSheet.data.spreadsheetId),
+      range: `A:${String.fromCharCode(65 + data[0].length - 2)}`, //${sheetName}! ${String.fromCharCode(65 + data[0].length - 2)}
+      valueInputOption: "USER_ENTERED",
+      resource: { values: data },
+    };
+
+    await drive.files.update({
+      fileId: String(newSheet.data.spreadsheetId),
+      addParents: `${choosenFolder}`,
+      fields: "id, parents",
+    });
+
+    await sheets.spreadsheets.values.append(googleSheetsOptions);
+
+    res.status(200).send("Stored in the sheets");
+  } catch (err) {
+    res.status(500).send("something went wrong");
   }
-
-  const googleSheetsOptions = {
-    auth,
-    spreadsheetId: process.env["SHEET_ID"],
-    range: `${sheetName}!A:${String.fromCharCode(65 + data[0].length - 1)}`,
-    valueInputOption: "USER_ENTERED",
-    resource: { values: data },
-  };
-
-  let store = await sheets.spreadsheets.values.append(googleSheetsOptions);
-
-  let sheet = await (await sheets.spreadsheets.values.get(request)).data.values;
-
-  let write = await fs.createWriteStream("test.csv");
-
-
-
-
-  sheet?.forEach((array)=> {
-    csv += array.join(",");
-    csv += "\n"
-  })
-
-    await fs.writeFile("test.csv", csv , (err) => {
-      console.log(err);
-    })
-
-    // await write.write(csv);
-
-
-    console.log(csv);
-
-  res.status(200).json(store);
-
-  
 }
