@@ -5,7 +5,9 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  if (req.method != "POST") return res.status(404).send("Invalid route");
+  console.log(req.method);
+  if (req.method != "POST") return res.status(404).send("Invalid rout");
+ 
 
   const scopes = ["https://www.googleapis.com/auth/drive", "profile"];
   const creds = process.env["GOOGLE_APPLICATION_CREDENTIALS"];
