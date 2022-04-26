@@ -110,9 +110,9 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     return data;
   });
 
-  // const res = await axios.post("https://pollitik-scrapper.herokuapp.com//api/googledrive", {
-  //   query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
-  // });
+  const res2 = await axios.post("https://pollitik-scrapper.herokuapp.com//api/googledrive", {
+    query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
+  });
 
   const res = await axios.post("https://pollitik-scrapper.herokuapp.com//api/test")
 
@@ -120,7 +120,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
 
   return {
-    props: { data, countries:["hi","hi"]},
+    props: { data, countries:res.data},
   };
 };
 
