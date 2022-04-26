@@ -8,7 +8,7 @@ import Link from "next/link";
 
 const production = "https://pollitik-scrapper.herokuapp.com/";
 const development = "http://localhost:3000/";
-const url = (process.env.NODE_ENV ? production : development);
+const main_url = (process.env.NODE_ENV ? production : development);
 
 const scrape = ({
   data,
@@ -40,7 +40,7 @@ const scrape = ({
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const url = ctx.query.url as string;
   const client = axios.create({
-    baseURL : url,
+    baseURL : main_url,
     withCredentials: false,
   })
 
