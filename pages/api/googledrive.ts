@@ -28,16 +28,16 @@ export default async function handler(
 
   if (req.method === "POST") {
     try {
-      // const resApi = await drive.files.list({
-      //   q: `${query2} and mimeType = 'application/vnd.google-apps.folder'`,
-      //   pageSize: 200,
-      //   fields: "nextPageToken, files(id,name)",
-      //   spaces: "drive",
-      //   pageToken: pageToken,
-      //   orderBy: "name asc",
-      // });
-      // const folders = resApi.data.files;
-      res.status(200).json(test);
+      const resApi = await drive.files.list({
+        q: `${query2} and mimeType = 'application/vnd.google-apps.folder'`,
+        pageSize: 200,
+        fields: "nextPageToken, files(id,name)",
+        spaces: "drive",
+        pageToken: pageToken,
+        orderBy: "name asc",
+      });
+      const folders = resApi.data.files;
+      res.status(200).json(folders);
     } catch (err) {
       res.status(500).send("Something went wrong");
     }
