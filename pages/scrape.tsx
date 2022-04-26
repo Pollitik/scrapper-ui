@@ -1,5 +1,5 @@
 import React from "react";
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import {GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import puppeteer from "puppeteer";
 import TableData from "#/components/common/TableData";
 import axios from "axios";
@@ -9,6 +9,9 @@ import Link from "next/link";
 const production = "https://pollitik-scrapper.herokuapp.com/";
 const development = "http://localhost:3000/";
 const main_url = (process.env.NODE_ENV ? production : development);
+
+
+
 
 const scrape = ({
   data,
