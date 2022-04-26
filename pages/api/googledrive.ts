@@ -37,7 +37,7 @@ export default async function handler(
         orderBy: "name asc",
       });
       const folders = resApi.data.files;
-      res.status(200).json(folders);
+      res.status(200).json(test);
     } catch (err) {
       res.status(500).send("Something went wrong");
     }

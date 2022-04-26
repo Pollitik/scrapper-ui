@@ -123,7 +123,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     return data;
   });
 
-  const res2 = await axios.post("https://pollitik-scrapper.herokuapp.com//api/googledrive", {
+  const res2 = await client.post("api/googledrive", {
     query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
   });
 
