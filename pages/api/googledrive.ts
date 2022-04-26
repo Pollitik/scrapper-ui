@@ -26,31 +26,31 @@ export default async function handler(
 
   const query2 = req.body.query;
 
-  // if (req.method === "POST") {
-  //   try {
-  //     const resApi = await drive.files.list({
-  //       q: `${query2} and mimeType = 'application/vnd.google-apps.folder'`,
-  //       pageSize: 200,
-  //       fields: "nextPageToken, files(id,name)",
-  //       spaces: "drive",
-  //       pageToken: pageToken,
-  //       orderBy: "name asc",
-  //     });
-  //     const folders = resApi.data.files;
-  //     res.status(200).json(folders);
-  //   } catch (err) {
-  //     return res.status(500).send("Something went wrong");
-  //   }
-  // }
-
-   if(req.method === "GET"){
-    try{
-       res.status(200).json(test);
-    }
-    catch(err){
-       res.status(500).send("Sever error");
+  if (req.method === "POST") {
+    try {
+      const resApi = await drive.files.list({
+        q: `${query2} and mimeType = 'application/vnd.google-apps.folder'`,
+        pageSize: 200,
+        fields: "nextPageToken, files(id,name)",
+        spaces: "drive",
+        pageToken: pageToken,
+        orderBy: "name asc",
+      });
+      const folders = resApi.data.files;
+      res.status(200).json(folders);
+    } catch (err) {
+      return res.status(500).send("Something went wrong");
     }
   }
+
+  //  if(req.method === "GET"){
+  //   try{
+  //      res.status(200).json(test);
+  //   }
+  //   catch(err){
+  //      res.status(500).send("Sever error");
+  //   }
+  // }
   // else{
   //   res.status(404).send("Invalid route");
   // }
