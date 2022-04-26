@@ -124,7 +124,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   //   query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
   // });
 
-  const res = await client.get("/api/test");
+  const res = await client.get("/api/googledrive");
 
   console.log(res);
 
