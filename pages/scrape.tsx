@@ -120,7 +120,7 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
 
   return {
-    props: { data, countries:["hi"]},
+    props: { data, countries:["hi","hi"]},
   };
 };
 
