@@ -5,6 +5,11 @@ import TableData from "#/components/common/TableData";
 import axios from "axios";
 import Link from "next/link";
 
+
+const production = "https://pollitik-scrapper.herokuapp.com/";
+const development = "http://localhost:3000/";
+const url = (process.env.NODE_ENV ? production : development);
+
 const scrape = ({
   data,
   countries
@@ -18,7 +23,7 @@ const scrape = ({
           </Link>
         </li>
       </ul>
-      {data?.length &&
+      {/* {data?.length &&
         data.map((table, index) => (
           <TableData
             countries={countries}
@@ -26,14 +31,19 @@ const scrape = ({
             data={table}
             id={String(index)}
           />
-        ))}
-        {/* {data} */}
+        ))} */}
+        {countries}
     </div>
   );
 };
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const url = ctx.query.url as string;
+  const client = axios.create({
+    baseURL : url,
+    withCredentials: false,
+  })
+
   if (!url)
     return {
       redirect: {
@@ -110,11 +120,11 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     return data;
   });
 
-  const res2 = await axios.post("https://pollitik-scrapper.herokuapp.com//api/googledrive", {
-    query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
-  });
+  // const res2 = await axios.post("https://pollitik-scrapper.herokuapp.com//api/googledrive", {
+  //   query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
+  // });
 
-  const res = await axios.post("https://pollitik-scrapper.herokuapp.com//api/test")
+  const res = await client.post("/api/test");
 
   console.log(res);
 
