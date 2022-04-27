@@ -26,7 +26,7 @@ const scrape = ({
           </Link>
         </li>
       </ul>
-      {/* {data?.length &&
+      {data?.length &&
         data.map((table, index) => (
           <TableData
             countries={countries}
@@ -34,8 +34,8 @@ const scrape = ({
             data={table}
             id={String(index)}
           />
-        ))} */}
-        {countries}
+        ))}
+       
     </div>
   );
 };
