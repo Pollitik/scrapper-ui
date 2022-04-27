@@ -5,6 +5,11 @@ import TableData from "#/components/common/TableData";
 import axios from "axios";
 import Link from "next/link";
 
+
+const production = "https://pollitik-scrapper.herokuapp.com/";
+const development = "http://localhost:3000/";
+const main_url = (process.env.NODE_ENV ? production : development);
+
 const morningconsult = ({
   data,
   countries
@@ -30,8 +35,14 @@ export const getServerSideProps: GetServerSideProps = async () => {
   const data: any[] = [];
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox"],
+    args: ["--no-sandbox","--incognito", "--single-process", "--no-zygote","--disable-setuid-sandbox"],
   });
+
+  const client = axios.create({
+    baseURL : main_url,
+    withCredentials: false,
+  });
+
   const page = await browser.newPage();
   await page.goto("https://morningconsult.com/global-leader-approval/", {
     waitUntil: "domcontentloaded",
@@ -71,7 +82,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
   }
 
 
-  const res = await axios.post("api/googledrive", {
+  const res = await client.post("api/googledrive", {
     query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
   });
 

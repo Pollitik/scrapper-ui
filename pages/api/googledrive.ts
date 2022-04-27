@@ -6,10 +6,10 @@ export default async function handler(
   res: NextApiResponse
 ) {
 
-  // if (req.method != "POST") {
-  //   console.log(req.method);
-  //   return res.status(404).send("Invalid route");
-  // }
+  if (req.method != "POST") {
+    console.log(req.method);
+    return res.status(404).send("Invalid route");
+  }
  
   const test:any[] = [2,3,4,3,2,2]
   const scopes = ["https://www.googleapis.com/auth/drive", "profile"];
@@ -42,17 +42,5 @@ export default async function handler(
       res.status(500).send("Something went wrong");
     }
   }
-
-  //  if(req.method === "GET"){
-  //   try{
-  //      res.status(200).json(test);
-  //   }
-  //   catch(err){
-  //      res.status(500).send("Sever error");
-  //   }
-  // }
-  // else{
-  //   res.status(404).send("Invalid route");
-  // }
 
 }
