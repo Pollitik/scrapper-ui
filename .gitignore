@@ -40,4 +40,4 @@ yarn-error.log*
 *.tsbuildinfo
 
 test.csv
-secrets.json
+google-credentials.json
