@@ -11,12 +11,12 @@ const Home: NextPage = () => {
 
     const formData = new FormData(e.target as HTMLFormElement);
 
-    if(formData.get("url") != "https://morningconsult.com/global-leader-approval/"){
-      router.push("/scrape?url=" + formData.get("url"));
-    }
-    else{
+    // if(formData.get("url") != "https://morningconsult.com/global-leader-approval/"){
+    //   router.push("/scrape?url=" + formData.get("url"));
+    // }
+    // else{
       router.push("/morningconsult?url=" + formData.get("url"));
-    }
+    
    
   };
   return (
