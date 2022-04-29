@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, ReactEventHandler } from "react";
 import TableRow from "#/components/common/TableRow";
+import LoadingIcon from "../LoadingIcon";
 import axios from "axios";
 
 
@@ -23,6 +24,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
   const [inputData, setInput] = useState("");
   const [replaceData, setReplaceInput] = useState("");
+  const [loading,setLoading] = useState<boolean>(false);
 
   const sheetRef = useRef<HTMLInputElement>(null);
 
@@ -264,30 +266,11 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     setStateDate([...stateData]);
   };
 
-  /*
-  Goal:Drag and Drop row onto another row. Then switch
-    step 1: Click and hold on the row
-      What happens when you click and drag the row?(The row index is collected)
-
-
-      What are the animations when there is a click and hold on the row?(row is turned green)
-        What happens when you click and hold on another row , when another row was already clicked?(check for change in id)
-          How do you check for change in ID?(Comapre two variables. One variable containing the last cliked row and the other variable containing the current clicked row)
-      
-      
-    step 2: Drag the row to another row or (col)
-      What happens when you drag the element on another onto to the other same element?(pull the index of the dropped on element. Then switch the row)
-
-*/
 
   const onDragRowStart = (index: number, e: React.DragEvent) => {
     //Where I obtain the dragged item
     e.dataTransfer?.setData("id", String(index));
     currentDraggedItem.current = "row";
-
-    var object = document.getElementById(`#${id}`);
-
-    object?.style.backgroundColor.replace("", "green");
   };
 
   const onDragColStart = (index: number, e: React.DragEvent) => {
@@ -307,9 +290,8 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     dropTargetIndex: number,
     e: React.DragEvent | React.SyntheticEvent
   ) => {
-    //Where we switch the dragged item with the item that was dropped on
+    // We switch the dragged item with the item that was dropped on
     //Add a functionnality to check if the dragged item type(col or row) matches with the dropped item type
-
 
     var dropItemIndex: number = +(e as React.DragEvent).dataTransfer.getData(
       "id"
@@ -363,12 +345,6 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     console.log(stateData)
   };
 
-  /*
-    Objective: Add newly created google sheet into a specific folder
-      Step 1: Collect the id of the chosen folder and collect the meta file data of the created google sheets file
-        (How do we do that?): We can pull this data from the post we made to the server. With both google drive api and google sheets api
-  */
-
   useEffect(() => {
     let traceNumbers: number[][] = [];
     let nums: number[] = [];
@@ -397,7 +373,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
   return (
     <div className={"" + id + " " + "flex flex-col justify-center items-center"}>
-      <div>
+      <div className="flex flex-row">
         <button onClick={handleUndo}>Undo</button>
         <input
           onChange={(e) => setInput(e.target.value)}
@@ -426,12 +402,14 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
         <button
           onClick={async () => {
 
-        
+            await setLoading(true);
             await client.post("api/spreadsheet", {
               folderId: selectedFolder.current,
               sheetName: sheetRef.current?.value || "trash",
               data: stateData,
             });
+            await setLoading(false);
+
           }}
         >
           Add table
@@ -459,6 +437,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
             </option>
           ))}
         </select>
+        {loading && <LoadingIcon/>}
       </div>
       <table className="my-10">
         <tbody>
