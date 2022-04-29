@@ -33,6 +33,18 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
   const currentStyle = useRef("");
 
+  
+  const production = "https://pollitik-scrapper.herokuapp.com/";
+  const development = "http://localhost:3000/";
+  const main_url = (process.env.NODE_ENV ? production : development);
+
+  const client = axios.create({
+    baseURL : main_url,
+    withCredentials: false,
+  })
+
+
+
   const handleRowDelete = (id: number) => {
     setStateDate((prev) => prev.filter((_, index) => index != id));
     setUndoData([...undoData, { index: id, data: stateData[id], type: "row" }]);
@@ -413,7 +425,9 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
         <button
           onClick={async () => {
-            await axios.post("/api/spreadsheet", {
+
+        
+            await client.post("api/spreadsheet", {
               folderId: selectedFolder.current,
               sheetName: sheetRef.current?.value || "trash",
               data: stateData,

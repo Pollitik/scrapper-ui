@@ -1,14 +1,22 @@
-import React from "react";
+import React,{useState} from "react";
 import { GetServerSideProps,InferGetServerSidePropsType } from "next";
-import puppeteer from "puppeteer-core";
-import TableData from "#/components/common/TableData";
+import puppeteer from "puppeteer";
+import TableWrapper from "#/components/common/TableData/TableWrapper";
 import axios from "axios";
 import Link from "next/link";
+
+
+const production = "https://pollitik-scrapper.herokuapp.com/";
+const development = "http://localhost:3000/";
+const main_url = (process.env.NODE_ENV ? production : development);
+
+
 
 const morningconsult = ({
   data,
   countries
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  
   return (
     <div className="flex flex-col justify-center items-center px-10">
 
@@ -19,9 +27,11 @@ const morningconsult = ({
           </Link>
         </li>
       </ul>
-      {data.map((table:any, index:any) => (
-        <TableData key={index} id={String(index)} data={table} countries={countries} />
-      ))}
+   
+
+      
+      <TableWrapper data={data} folders={countries}/>
+  
     </div>
   );
 };
@@ -30,8 +40,14 @@ export const getServerSideProps: GetServerSideProps = async () => {
   const data: any[] = [];
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox"],
+    args: ["--no-sandbox","--incognito", "--single-process", "--no-zygote","--disable-setuid-sandbox"],
   });
+
+  const client = axios.create({
+    baseURL : main_url,
+    withCredentials: false,
+  });
+
   const page = await browser.newPage();
   await page.goto("https://morningconsult.com/global-leader-approval/", {
     waitUntil: "domcontentloaded",
@@ -71,7 +87,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
   }
 
 
-  const res = await axios.post("http://localhost:3000/api/googledrive", {
+  const res = await client.post("api/googledrive", {
     query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
   });
 

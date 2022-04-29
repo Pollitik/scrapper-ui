@@ -1,13 +1,22 @@
 import React from "react";
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
-import puppeteer from "puppeteer-core";
+import {GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import puppeteer from "puppeteer";
 import TableData from "#/components/common/TableData";
+import TableWrapper from "#/components/common/TableData/TableWrapper";
 import axios from "axios";
 import Link from "next/link";
 
+
+const production = "https://pollitik-scrapper.herokuapp.com/";
+const development = "http://localhost:3000/";
+const main_url = (process.env.NODE_ENV ? production : development);
+
+
+
+
 const scrape = ({
   data,
-  countries,
+  countries
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
   return (
     <div className="flex flex-col justify-center items-center px-10">
@@ -27,12 +36,18 @@ const scrape = ({
             id={String(index)}
           />
         ))}
+       
     </div>
   );
 };
 
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const url = ctx.query.url as string;
+  const client = axios.create({
+    baseURL : main_url,
+    withCredentials: false,
+  })
+
   if (!url)
     return {
       redirect: {
@@ -41,13 +56,17 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       props: {},
     };
 
+
+ 
   const browser = await puppeteer.launch({
     headless: true,
-    args: ["--no-sandbox"],
+    defaultViewport:null,
+    args: ["--no-sandbox","--incognito", "--single-process", "--no-zygote","--disable-setuid-sandbox"],
   });
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: "domcontentloaded" });
 
+  // data = await page.title();
   const data = await page.evaluate(() => {
     const isDate = (date: string) => {
       return !isNaN(Date.parse(date));
@@ -105,14 +124,17 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     return data;
   });
 
-  const res = await axios.post("http://localhost:3000/api/googledrive", {
+  const res2 = await client.post("api/googledrive", {
     query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
   });
 
-  console.log(res.data);
+  // const res = await client.get("api/googledrive");
+
+  console.log(res2);
+
 
   return {
-    props: { data, countries: res.data },
+    props: { data, countries:res2.data},
   };
 };
 
