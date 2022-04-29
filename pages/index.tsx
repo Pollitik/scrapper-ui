@@ -14,6 +14,7 @@ const Home: NextPage = () => {
     const formData = new FormData(e.target as HTMLFormElement);
 
     if(formData.get('url') !== ""){
+      setLoading(true)
       if (
         formData.get("url") ==
         "https://morningconsult.com/global-leader-approval/"
@@ -42,7 +43,7 @@ const Home: NextPage = () => {
           name="url"
           id="url"
         />
-        <button type="submit" onClick={() => setLoading(true)}>
+        <button type="submit">
           Submit{" "}
         </button>
 
