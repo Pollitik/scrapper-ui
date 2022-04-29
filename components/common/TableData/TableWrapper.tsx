@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import LoadingIcon from "../LoadingIcon";
 import TableData from ".";
 import axios from "axios";
 
@@ -39,9 +40,10 @@ const addAllTables = (tableData: any[][] | undefined) => {
   return allTables;
 };
 
-const TableWrapper: React.FC<Props> = ({ data, folders}) => {
+const TableWrapper: React.FC<Props> = ({ data, folders }) => {
   const fileName = useRef<HTMLInputElement>(null);
   const choosenFolder = useRef<String>("0B1t8CP92v4NSOUExcVFpNjBlZGs");
+  const [loading, setLoading] = useState<boolean>(false);
 
   return (
     <div className="">
@@ -56,14 +58,20 @@ const TableWrapper: React.FC<Props> = ({ data, folders}) => {
         />
         <button
           onClick={async () => {
-            const res = await axios.post("http://localhost:3000/api/spreadsheet", {
-              folderId: choosenFolder.current,
-              sheetName: fileName.current?.value || "trash",
-              data: addAllTables(data),
-            });
 
+            await setLoading(true);
+            const res = await axios.post(
+              "http://localhost:3000/api/spreadsheet",
+              {
+                folderId: choosenFolder.current,
+                sheetName: fileName.current?.value || "trash",
+                data: addAllTables(data),
+              }
+            );
+
+            await setLoading(false);
             console.log(res);
-            console.log(addAllTables(data))
+            console.log(addAllTables(data));
           }}
         >
           Submit
@@ -90,6 +98,7 @@ const TableWrapper: React.FC<Props> = ({ data, folders}) => {
             );
           })}
         </select>
+        {loading && <LoadingIcon/>}
       </div>
       <br />
       {data?.map((table: any, index: number) => {

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, ReactEventHandler } from "react";
 import TableRow from "#/components/common/TableRow";
+import LoadingIcon from "../LoadingIcon";
 import axios from "axios";
 
 
@@ -23,6 +24,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
   const [inputData, setInput] = useState("");
   const [replaceData, setReplaceInput] = useState("");
+  const [loading,setLoading] = useState<boolean>(false);
 
   const sheetRef = useRef<HTMLInputElement>(null);
 
@@ -397,7 +399,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
   return (
     <div className={"" + id + " " + "flex flex-col justify-center items-center"}>
-      <div>
+      <div className="flex flex-row">
         <button onClick={handleUndo}>Undo</button>
         <input
           onChange={(e) => setInput(e.target.value)}
@@ -426,12 +428,14 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
         <button
           onClick={async () => {
 
-        
+            await setLoading(true);
             await axios.post("http://localhost:3000/api/spreadsheet", {
               folderId: selectedFolder.current,
               sheetName: sheetRef.current?.value || "trash",
               data: stateData,
             });
+            await setLoading(false);
+
           }}
         >
           Add table
@@ -459,6 +463,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
             </option>
           ))}
         </select>
+        {loading && <LoadingIcon/>}
       </div>
       <table className="my-10">
         <tbody>
