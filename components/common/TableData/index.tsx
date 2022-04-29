@@ -396,7 +396,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
   }, [stateData]);
 
   return (
-    <div className={"" + id}>
+    <div className={"" + id + " " + "flex flex-col justify-center items-center"}>
       <div>
         <button onClick={handleUndo}>Undo</button>
         <input
