@@ -27,7 +27,7 @@ const scrape = ({
           </Link>
         </li>
       </ul>
-      {data?.length &&
+      {/* {data?.length &&
         data.map((table, index) => (
           <TableData
             countries={countries}
@@ -35,7 +35,9 @@ const scrape = ({
             data={table}
             id={String(index)}
           />
-        ))}
+        ))} */}
+
+        <TableWrapper data={data} folders={countries}/>
        
     </div>
   );
@@ -67,13 +69,13 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   await page.goto(url, { waitUntil: "domcontentloaded" });
 
   // data = await page.title();
-  const data = await page.evaluate(() => {
+  const data:any[][] = await page.evaluate(() => {
     const isDate = (date: string) => {
       return !isNaN(Date.parse(date));
     };
 
     const tables = document.querySelectorAll("table");
-    const data: any[] = [];
+    const returnData: any[][] = [];
 
     tables.forEach((table) => {
       const tableRows = table.querySelectorAll("tr");
@@ -118,10 +120,12 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       });
 
       tableDataArr.splice(1,1);
-      data.push(tableDataArr);
+      returnData.push(tableDataArr);
     });
 
-    return data;
+    
+
+    return returnData;
   });
 
   const res2 = await client.post("api/googledrive", {
@@ -132,9 +136,11 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
   console.log(res2);
 
+  console.log(data);
+
 
   return {
-    props: { data, countries:res2.data},
+    props: {data, countries:res2.data},
   };
 };
 

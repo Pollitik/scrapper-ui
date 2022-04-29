@@ -396,7 +396,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
   }, [stateData]);
 
   return (
-    <div className={"" + id}>
+    <div className={"" + id + " " + "flex flex-col justify-center items-center"}>
       <div>
         <button onClick={handleUndo}>Undo</button>
         <input
@@ -427,7 +427,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
           onClick={async () => {
 
         
-            await client.post("api/spreadsheet", {
+            await axios.post("http://localhost:3000/api/spreadsheet", {
               folderId: selectedFolder.current,
               sheetName: sheetRef.current?.value || "trash",
               data: stateData,

@@ -4,7 +4,7 @@ import axios from "axios";
 
 interface Props {
   folders: string[];
-  data: any[][] | any[];
+  data: any[][] | undefined;
 }
 
 const production = "https://pollitik-scrapper.herokuapp.com/";
@@ -16,11 +16,11 @@ const client = axios.create({
   withCredentials: false,
 });
 
-const addAllTables = (tableData: any[][]) => {
+const addAllTables = (tableData: any[][] | undefined) => {
   let allTables: any[][] = [];
   let trackIndex = 0;
 
-  tableData.map((table, table_index) => {
+  tableData?.map((table, table_index) => {
     table.map((row, row_index) => {
       if (table_index == 0) {
         const header: string[] = row;
@@ -39,12 +39,12 @@ const addAllTables = (tableData: any[][]) => {
   return allTables;
 };
 
-const TableWrapper: React.FC<Props> = ({ data, folders, children }) => {
+const TableWrapper: React.FC<Props> = ({ data, folders}) => {
   const fileName = useRef<HTMLInputElement>(null);
   const choosenFolder = useRef<String>("0B1t8CP92v4NSOUExcVFpNjBlZGs");
 
   return (
-    <div>
+    <div className="">
       <br />
       <div className="flex flex-col justify-center items-center px-10">
         <h1>Add all tables</h1>
@@ -56,11 +56,14 @@ const TableWrapper: React.FC<Props> = ({ data, folders, children }) => {
         />
         <button
           onClick={async () => {
-            const res = await client.post("api/spreadsheet", {
+            const res = await axios.post("http://localhost:3000/api/spreadsheet", {
               folderId: choosenFolder.current,
               sheetName: fileName.current?.value || "trash",
               data: addAllTables(data),
             });
+
+            console.log(res);
+            console.log(addAllTables(data))
           }}
         >
           Submit
@@ -89,7 +92,7 @@ const TableWrapper: React.FC<Props> = ({ data, folders, children }) => {
         </select>
       </div>
       <br />
-      {data.map((table: any, index: number) => {
+      {data?.map((table: any, index: number) => {
         return (
           <TableData
             id={String(index)}
