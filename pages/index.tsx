@@ -13,11 +13,13 @@ const Home: NextPage = () => {
 
     if(formData.get("url") == "https://morningconsult.com/global-leader-approval/"){
       router.push("/morningconsult?url=" + formData.get("url"));
-      return;
+   
     }
+
+    if(formData.get("url") !== "https://morningconsult.com/global-leader-approval/"){
     // else{
-     
       router.push("/scrape?url=" + formData.get("url"));
+    }
     
    
   };

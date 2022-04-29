@@ -2,6 +2,7 @@ import React from "react";
 import {GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import puppeteer from "puppeteer";
 import TableData from "#/components/common/TableData";
+import TableWrapper from "#/components/common/TableData/TableWrapper";
 import axios from "axios";
 import Link from "next/link";
 

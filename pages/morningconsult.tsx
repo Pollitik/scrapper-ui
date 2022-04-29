@@ -1,7 +1,7 @@
-import React from "react";
+import React,{useState} from "react";
 import { GetServerSideProps,InferGetServerSidePropsType } from "next";
 import puppeteer from "puppeteer";
-import TableData from "#/components/common/TableData";
+import TableWrapper from "#/components/common/TableData/TableWrapper";
 import axios from "axios";
 import Link from "next/link";
 
@@ -10,10 +10,13 @@ const production = "https://pollitik-scrapper.herokuapp.com/";
 const development = "http://localhost:3000/";
 const main_url = (process.env.NODE_ENV ? production : development);
 
+
+
 const morningconsult = ({
   data,
   countries
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  
   return (
     <div className="flex flex-col justify-center items-center px-10">
 
@@ -24,9 +27,11 @@ const morningconsult = ({
           </Link>
         </li>
       </ul>
-      {data.map((table:any, index:any) => (
-        <TableData key={index} id={String(index)} data={table} countries={countries} />
-      ))}
+   
+
+      
+      <TableWrapper data={data} folders={countries}/>
+  
     </div>
   );
 };

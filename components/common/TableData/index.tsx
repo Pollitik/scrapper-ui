@@ -38,6 +38,11 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
   const development = "http://localhost:3000/";
   const main_url = (process.env.NODE_ENV ? production : development);
 
+  const client = axios.create({
+    baseURL : main_url,
+    withCredentials: false,
+  })
+
 
 
   const handleRowDelete = (id: number) => {
@@ -421,10 +426,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
         <button
           onClick={async () => {
 
-            const client = axios.create({
-              baseURL : main_url,
-              withCredentials: false,
-            })
+        
             await client.post("api/spreadsheet", {
               folderId: selectedFolder.current,
               sheetName: sheetRef.current?.value || "trash",
