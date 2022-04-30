@@ -68,22 +68,11 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     setUndoData([...undoData, { index: id, data: delCol, type: "col" }]);
   };
 
-  /* 
 
-   When user clicks on undo return the row or col
-
-    step 1: Anytime a user deletes a col or row collect the data. Obtain the index of row or col and the data
-      (How do can we tell from a column and a row?): In the row handler initialize the row type. With the column handler initialize the column type.
-    step 2: When user clicks on undo return the most recent deleted row or col
-      (What happens when most recent data was a row?):We can access through the table row and return the row.
-      (What happens when the most recent data was a column?):We can access through the table column and return the column.
-
-  */
 
   const handleUndo = () => {
     const undoEl = undoData.pop();
     const number = new RegExp("(>|=|<)");
-    // const numberwithCommas = new RegExp(`(${undoEl?.data[1]})`)
     let number2 = "";
     let inds = undoEl?.data[1];
 
@@ -147,11 +136,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     console.log(undoData);
   };
 
-  /*
-    Step 1: Obtain data from the left input and the right input
-      (How are we going to obtain this data?): 
-    Step 2: Find the words through each array and change that word into the replace word 
-  */
+
 
 
 
@@ -267,6 +252,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
   };
 
 
+
   const onDragRowStart = (index: number, e: React.DragEvent) => {
     //Where I obtain the dragged item
     e.dataTransfer?.setData("id", String(index));
@@ -290,8 +276,9 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
     dropTargetIndex: number,
     e: React.DragEvent | React.SyntheticEvent
   ) => {
-    // We switch the dragged item with the item that was dropped on
+    //Where we switch the dragged item with the item that was dropped on
     //Add a functionnality to check if the dragged item type(col or row) matches with the dropped item type
+
 
     var dropItemIndex: number = +(e as React.DragEvent).dataTransfer.getData(
       "id"
@@ -344,6 +331,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
 
     console.log(stateData)
   };
+
 
   useEffect(() => {
     let traceNumbers: number[][] = [];
@@ -408,6 +396,8 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
               sheetName: sheetRef.current?.value || "trash",
               data: stateData,
             });
+        
+
             await setLoading(false);
 
           }}

@@ -40,9 +40,6 @@ export default async function handler(
       });
       row.pop();
     }
-
-   
-
   });
 
   console.log(data);
@@ -62,7 +59,7 @@ export default async function handler(
     const googleSheetsOptions = {
       auth: authSheets,
       spreadsheetId: String(newSheet.data.spreadsheetId),
-      range: `A:${String.fromCharCode(65 + data[0].length - 2)}`, //${sheetName}! ${String.fromCharCode(65 + data[0].length - 2)}
+      range: `A:${String.fromCharCode(65 + data[0].length - 2)}`, 
       valueInputOption: "USER_ENTERED",
       resource: { values: data },
     };

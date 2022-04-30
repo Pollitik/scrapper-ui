@@ -13,8 +13,8 @@ const Home: NextPage = () => {
 
     const formData = new FormData(e.target as HTMLFormElement);
 
-    if(formData.get('url') !== ""){
-      setLoading(true)
+    if (formData.get("url") !== "") {
+      setLoading(true);
       if (
         formData.get("url") ==
         "https://morningconsult.com/global-leader-approval/"
@@ -26,12 +26,9 @@ const Home: NextPage = () => {
         formData.get("url") !==
         "https://morningconsult.com/global-leader-approval/"
       ) {
-        // else{
         router.push("/scrape?url=" + formData.get("url"));
       }
     }
-
-  
   };
 
   return (
@@ -43,9 +40,7 @@ const Home: NextPage = () => {
           name="url"
           id="url"
         />
-        <button type="submit">
-          Submit{" "}
-        </button>
+        <button type="submit">Submit </button>
 
         {loading && <LoadingIcon />}
       </form>
