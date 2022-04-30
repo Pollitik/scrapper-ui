@@ -1,23 +1,19 @@
-import React from "react";
-import {GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import React,{useState} from "react";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import puppeteer from "puppeteer";
-import TableData from "#/components/common/TableData";
 import TableWrapper from "#/components/common/TableData/TableWrapper";
 import axios from "axios";
 import Link from "next/link";
 
-
 const production = "https://pollitik-scrapper.herokuapp.com/";
 const development = "http://localhost:3000/";
-const main_url = (process.env.NODE_ENV ? production : development);
+const main_url = process.env.NODE_ENV ? production : development;
 
-
-
-
-const scrape = ({
+const Scrape = ({
   data,
-  countries
+  countries,
 }: InferGetServerSidePropsType<typeof getServerSideProps>) => {
+  const [view, setView] = useState<string>("");
   return (
     <div className="flex flex-col justify-center items-center px-10">
       <ul>
@@ -27,18 +23,21 @@ const scrape = ({
           </Link>
         </li>
       </ul>
-      {/* {data?.length &&
-        data.map((table, index) => (
-          <TableData
-            countries={countries}
-            key={index}
-            data={table}
-            id={String(index)}
-          />
-        ))} */}
 
-        <TableWrapper data={data} folders={countries}/>
-       
+      <select
+        id="viewSelect"
+        onChange={(e) => {
+          setView(String(e.target.value));
+        }}
+      >
+        <option id="viewOption1">View all tables</option>
+        <option id="viewOption2">View one table at a time</option>
+      </select>
+      <TableWrapper
+        tableView={view} 
+        data={data?.length ? data : [[]]}
+        folders={countries}
+      />
     </div>
   );
 };
@@ -46,9 +45,9 @@ const scrape = ({
 export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const url = ctx.query.url as string;
   const client = axios.create({
-    baseURL : main_url,
+    baseURL: main_url,
     withCredentials: false,
-  })
+  });
 
   if (!url)
     return {
@@ -58,18 +57,22 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       props: {},
     };
 
-
- 
   const browser = await puppeteer.launch({
     headless: true,
-    defaultViewport:null,
-    args: ["--no-sandbox","--incognito", "--single-process", "--no-zygote","--disable-setuid-sandbox"],
+    defaultViewport: null,
+    args: [
+      "--no-sandbox",
+      "--incognito",
+      "--single-process",
+      "--no-zygote",
+      "--disable-setuid-sandbox",
+    ],
   });
   const page = await browser.newPage();
   await page.goto(url, { waitUntil: "domcontentloaded" });
 
   // data = await page.title();
-  const data:any[][] = await page.evaluate(() => {
+  const data: any[][] = await page.evaluate(() => {
     const isDate = (date: string) => {
       return !isNaN(Date.parse(date));
     };
@@ -114,16 +117,14 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
         if (rowData.length == 0) return;
 
-        if(aTags.length > 0) rowData.push(aTags);
-        
+        if (aTags.length > 0) rowData.push(aTags);
+
         tableDataArr.push(rowData);
       });
 
-      tableDataArr.splice(1,1);
+      tableDataArr.splice(1, 1);
       returnData.push(tableDataArr);
     });
-
-    
 
     return returnData;
   });
@@ -138,10 +139,9 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
 
   console.log(data);
 
-
   return {
-    props: {data, countries:res2.data},
+    props: { data, countries: res2.data },
   };
 };
 
-export default scrape;
+export default Scrape;

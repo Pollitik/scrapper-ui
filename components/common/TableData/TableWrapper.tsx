@@ -2,10 +2,13 @@ import React, { useState, useRef } from "react";
 import LoadingIcon from "../LoadingIcon";
 import TableData from ".";
 import axios from "axios";
+import TableNav from "./TableNav";
+
 
 interface Props {
   folders: string[];
-  data: any[][] | undefined;
+  data: any[][];
+  tableView: string;
 }
 
 const production = "https://pollitik-scrapper.herokuapp.com/";
@@ -40,10 +43,26 @@ const addAllTables = (tableData: any[][] | undefined) => {
   return allTables;
 };
 
-const TableWrapper: React.FC<Props> = ({ data, folders }) => {
+const TableWrapper: React.FC<Props> = ({ data, folders, tableView }) => {
   const fileName = useRef<HTMLInputElement>(null);
   const choosenFolder = useRef<String>("0B1t8CP92v4NSOUExcVFpNjBlZGs");
   const [loading, setLoading] = useState<boolean>(false);
+
+  const tableDisplay = (view: String) => {
+    if (view == "View one table at a time") {
+      return <TableNav folders={folders} tables={data} />;
+    }
+    return data?.map((table: any, index: number) => {
+      return (
+        <TableData
+          id={String(index)}
+          key={index}
+          data={table}
+          countries={folders}
+        />
+      );
+    });
+  };
 
   return (
     <div className="">
@@ -58,7 +77,6 @@ const TableWrapper: React.FC<Props> = ({ data, folders }) => {
         />
         <button
           onClick={async () => {
-
             await setLoading(true);
             const res = await axios.post(
               "http://localhost:3000/api/spreadsheet",
@@ -70,12 +88,11 @@ const TableWrapper: React.FC<Props> = ({ data, folders }) => {
             );
 
             await setLoading(false);
-            console.log(res);
-            console.log(addAllTables(data));
           }}
         >
           Submit
         </button>
+
         <select
           onChange={(e: any) => {
             const selectedFolder = document.getElementById(`${e.target.value}`);
@@ -98,19 +115,11 @@ const TableWrapper: React.FC<Props> = ({ data, folders }) => {
             );
           })}
         </select>
-        {loading && <LoadingIcon/>}
+
+        {loading && <LoadingIcon />}
       </div>
       <br />
-      {data?.map((table: any, index: number) => {
-        return (
-          <TableData
-            id={String(index)}
-            key={index}
-            data={table}
-            countries={folders}
-          />
-        );
-      })}
+      {tableDisplay(tableView)}
     </div>
   );
 };
