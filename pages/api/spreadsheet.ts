@@ -38,9 +38,10 @@ export default async function handler(
         row[linkMeta[1]] = `=HYPERLINK("${linkMeta[0]}", "${row[linkMeta[1]]}")`;
 
       });
+      row.pop();
     }
 
-    row.pop();
+   
 
   });
 
