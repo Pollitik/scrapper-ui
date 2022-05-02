@@ -15,19 +15,19 @@ const Home: NextPage = () => {
 
     if (formData.get("url") !== "") {
       setLoading(true);
-      if (
-        formData.get("url") ==
-        "https://morningconsult.com/global-leader-approval/"
-      ) {
-        router.push("/morningconsult?url=" + formData.get("url"));
-      }
+      // if (
+      //   formData.get("url") ==
+      //   "https://morningconsult.com/global-leader-approval/"
+      // ) {
+        router.push(formData.get("url") === "https://morningconsult.com/global-leader-approval/" ? "/morningconsult?url=" + formData.get("url")  : "/scrape?url=" + formData.get("url"));
+      // }
 
-      if (
-        formData.get("url") !==
-        "https://morningconsult.com/global-leader-approval/"
-      ) {
-        router.push("/scrape?url=" + formData.get("url"));
-      }
+      // if (
+      //   formData.get("url") !==
+      //   "https://morningconsult.com/global-leader-approval/"
+      // ) {
+      //   router.push("/scrape?url=" + formData.get("url"));
+      // }
     }
   };
 
