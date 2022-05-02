@@ -1,4 +1,4 @@
-import React,{useState} from "react";
+import React, { useState } from "react";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import puppeteer from "puppeteer";
 import TableWrapper from "#/components/common/TableData/TableWrapper";
@@ -34,7 +34,7 @@ const Scrape = ({
         <option id="viewOption2">View one table at a time</option>
       </select>
       <TableWrapper
-        tableView={view} 
+        tableView={view}
         data={data?.length ? data : [[]]}
         folders={countries}
       />
@@ -69,6 +69,55 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     ],
   });
   const page = await browser.newPage();
+
+  if (url === "https://morningconsult.com/global-leader-approval/") {
+    const data: any[][] = [];
+    await page.goto("https://morningconsult.com/global-leader-approval/", {
+      waitUntil: "domcontentloaded",
+    });
+    const tableData = await page.evaluate(() => {
+      // @ts-ignore
+      return mc_timeline_filterable;
+    });
+
+    const inputData = (index: number, amountOfData: number) => {
+      const tempArr: any[] = [];
+
+      tempArr.push(["Name", "Date", "Approval", "Disapproval"]);
+      for (let b = 0; b < amountOfData; b++) {
+        const date = new Date(tableData[1][0][index][b][0] * 1000);
+        const dateTime = date.toLocaleDateString();
+        const presidentNameInput = tableData["1"][0][index][b][1];
+        const approvalRateInput = tableData["1"][0][index][b][2];
+        const disapprovalInput = tableData["1"][0][index][b][3];
+
+        tempArr.push([
+          presidentNameInput,
+          dateTime,
+          approvalRateInput,
+          disapprovalInput,
+        ]);
+      }
+      data.push(tempArr);
+    };
+
+    for (let t = 0; t < tableData["1"][0].length; t++) {
+      inputData(t, tableData["1"][0][t].length);
+    }
+
+    const res = await client.post("api/googledrive", {
+      query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
+    });
+
+    return {
+      props: {
+        data,
+        countries: res.data,
+      },
+    }
+  }
+
+  
   await page.goto(url, { waitUntil: "domcontentloaded" });
 
   // data = await page.title();
@@ -132,7 +181,6 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   const res2 = await client.post("api/googledrive", {
     query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
   });
-
 
   console.log(res2);
 
