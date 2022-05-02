@@ -19,9 +19,9 @@ const TableNav: React.FC<Props> = ({ tables, folders }) => {
           {tables?.map((table, index: number) => {
             return (
               <button
-                className={`px-4 py-1 text-sm text-black-600 ${table[0].length <= 3 && table.length  <= 3 ? "bg-[red]" : ""} font-semibold rounded-full border  hover:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2`}
+                className={`px-4 py-1 text-sm text-black-600 ${table[0].length <= 3 || table.length  <= 3 ? "bg-[red]" : ""} font-semibold rounded-full border  hover:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2`}
                 key={index}
-                title={table[0].length <= 3 && table.length <= 3 ? "No data" : table[1]}
+                title={table[0].length <= 3 || table.length <= 3 ? "No data" : table[1]}
                 onClick={() => {
                   renderTable(false);
                   setTableIndex(String(index));
