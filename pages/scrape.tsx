@@ -7,7 +7,7 @@ import Link from "next/link";
 
 const production = "https://pollitik-scrapper.herokuapp.com/";
 const development = "http://localhost:3000/";
-const main_url = process.env.NODE_ENV ? production : development;
+const main_url = process.env.NODE_ENV === 'production' ? production : development;
 
 const Scrape = ({
   data,
@@ -23,7 +23,6 @@ const Scrape = ({
           </Link>
         </li>
       </ul>
-
       <select
         id="viewSelect"
         onChange={(e) => {
@@ -105,14 +104,15 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
       inputData(t, tableData["1"][0][t].length);
     }
 
-    const res = await client.post("api/googledrive", {
+    const googleDriveFolders = await client.post("api/googledrive", {
       query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
     });
 
+    console.log(googleDriveFolders);
     return {
       props: {
         data,
-        countries: res.data,
+        countries: googleDriveFolders.data,
       },
     }
   }
@@ -120,7 +120,6 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
   
   await page.goto(url, { waitUntil: "domcontentloaded" });
 
-  // data = await page.title();
   const data: any[][] = await page.evaluate(() => {
     const isDate = (date: string) => {
       return !isNaN(Date.parse(date));
@@ -178,16 +177,17 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     return returnData;
   });
 
-  const res2 = await client.post("api/googledrive", {
+  const googleDriveFolders = await client.post("api/googledrive", {
     query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
   });
 
-  console.log(res2);
+  console.log(process.env.NODE_ENV)
+  console.log(googleDriveFolders.data);
 
-  console.log(data);
+  // console.log(data);
 
   return {
-    props: { data, countries: res2.data },
+    props: { data, countries: googleDriveFolders.data},
   };
 };
 
