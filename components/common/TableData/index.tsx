@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, ReactEventHandler } from "react";
+import React, { useState, useRef, useEffect} from "react";
 import TableRow from "#/components/common/TableRow";
 import LoadingIcon from "../LoadingIcon";
 import axios from "axios";
