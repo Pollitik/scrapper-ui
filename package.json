@@ -1,11 +1,6 @@
 {
   "name": "scrapper-ui",
   "private": true,
-  "version": "0.0.1",
-  "engines": {
-    "npm" : "6.x",
-    "node": "17.x"
-  },
   "scripts": {
     "dev": "next dev",
     "build": "next build",
