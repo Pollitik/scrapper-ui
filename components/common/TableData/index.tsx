@@ -431,7 +431,6 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
       </div>
       <table className="my-10">
         <tbody>
-          {/*  */}
           {stateData[0] && (
             <tr>
               <td></td>

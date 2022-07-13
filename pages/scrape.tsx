@@ -8,7 +8,6 @@ import Link from "next/link";
 const production = "https://pollitik-scrapper.herokuapp.com/";
 const development = "http://localhost:3000/";
 const main_url = process.env.NODE_ENV === 'production' ? production : development;
-
 const Scrape = ({
   data,
   countries,
@@ -177,14 +176,11 @@ export const getServerSideProps = async (ctx: GetServerSidePropsContext) => {
     return returnData;
   });
 
-  const googleDriveFolders = await axios.post("https://pollitik-scrapper.herokuapp.com/api/googledrive", {
+  const googleDriveFolders = await client.post("api/googledrive", {
     query: "'0B1t8CP92v4NSdnRGMVR0Y3NKckE'" + " in parents",
   });
 
-  console.log(process.env.NODE_ENV)
   console.log(googleDriveFolders.data);
-
-  // console.log(data);
 
   return {
     props: { data, countries: googleDriveFolders.data},
