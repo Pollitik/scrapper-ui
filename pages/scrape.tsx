@@ -5,7 +5,7 @@ import TableWrapper from "#/components/common/TableData/TableWrapper";
 import axios from "axios";
 import Link from "next/link";
 
-const production = "https://pollitik-scrapper.herokuapp.com/";
+const production = "https://pollitik-scrapper.onrender.com/";
 const development = "http://localhost:3000/";
 const main_url = process.env.NODE_ENV === 'production' ? production : development;
 const Scrape = ({
