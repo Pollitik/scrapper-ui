@@ -36,7 +36,7 @@ const TableData: React.FC<Props> = ({ data, id, countries }) => {
   const currentStyle = useRef("");
 
   
-  const production = "https://pollitik-scrapper.herokuapp.com/";
+  const production = "https://pollitik-scrapper.onrender.com/";
   const development = "http://localhost:3000/";
   const main_url = (process.env.NODE_ENV ? production : development);
 
