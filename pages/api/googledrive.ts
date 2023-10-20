@@ -40,6 +40,7 @@ export default async function handler(
       res.status(200).json(folders);
     } catch (err) {
       res.status(500).send("Something went wrong");
+      console.log(err);
     }
   }
 

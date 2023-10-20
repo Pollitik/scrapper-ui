@@ -59,7 +59,7 @@ export default async function handler(
     const googleSheetsOptions = {
       auth: authSheets,
       spreadsheetId: String(newSheet.data.spreadsheetId),
-      range: `A:${String.fromCharCode(65 + data[0].length - 2)}`, 
+      range: `A:${String.fromCharCode(65 + data[0].length - 1)}`, 
       valueInputOption: "USER_ENTERED",
       resource: { values: data },
     };
@@ -75,5 +75,6 @@ export default async function handler(
     res.status(200).send("Stored in the sheets");
   } catch (err) {
     res.status(500).send("something went wrong");
+    console.log(err);
   }
 }
